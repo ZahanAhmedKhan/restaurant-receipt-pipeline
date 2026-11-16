@@ -220,8 +220,12 @@ def add_deliberate_errors(receipts):
 # Drawing the receipt image
 # ---------------------------------------------------------------------------
 def load_font(size):
-    """Use a monospaced Windows font if present; otherwise Pillow's default."""
-    for name in ("consola.ttf", "cour.ttf", "DejaVuSansMono.ttf"):
+    """Use a monospaced Windows font if present; otherwise Pillow's default.
+
+    Courier New Bold looks like a receipt printer and has a plain zero.
+    (Consolas has a dotted zero that Tesseract often read as 8 or @.)
+    """
+    for name in ("courbd.ttf", "cour.ttf", "consola.ttf", "DejaVuSansMono.ttf"):
         try:
             return ImageFont.truetype(name, size)
         except OSError:

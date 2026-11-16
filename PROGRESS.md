@@ -19,9 +19,15 @@
   saved as `data/raw/<sha256>.<ext>`, duplicates detected by hash) and `scan_inbox()` (skips files
   newer than 10 s, moves rejected files to `data/failed/`). Fixed `setup_db.py` so each SQL file commits.
 
+- **M2.1 Tesseract OCR:** `src/ocr.py` with `run_tesseract(path)`, `ocr_file()` (stores a row in
+  `raw.ocr_run`, sets file status `ocr_done`/`failed`, stores only the error type on failure) and
+  `ocr_pending()`. Tried page modes and preprocessing on the samples; `--psm 6` on the plain image was
+  best, so no preprocessing. Sample receipts were regenerated with Courier New Bold: the old font's
+  dotted zero was often read as 8 or @ (ground-truth JSON unchanged, only images).
+
 ## Next
 
-- **M2.1 Tesseract OCR:** `src/ocr.py`.
+- **M2.2 Parsing:** `src/parse.py`.
 
 ## Open issues
 
@@ -66,3 +72,10 @@
 - Python `logging`
 - pytest `tmp_path` and `monkeypatch`
 - Implicit transactions vs. savepoints in psycopg
+
+### M2.1
+- How OCR works (Tesseract, page segmentation modes `--psm`)
+- Image preprocessing (grayscale, resizing) and measuring before adding it
+- Timing code with `time.perf_counter()`
+- Recording failures without losing data (error column + status)
+- `pathlib` path joining
