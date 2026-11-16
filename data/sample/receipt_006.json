@@ -1,0 +1,42 @@
+{
+  "file": "receipt_006.png",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-06-12",
+  "receipt_number": "HF-10217",
+  "lines": [
+    {
+      "description": "FLOUR AP 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "22.40",
+      "line_total": "89.60"
+    },
+    {
+      "description": "CHKN BRST 10LB",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "32.50",
+      "line_total": "97.50"
+    },
+    {
+      "description": "GRND BEEF 80/20 10LB",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "48.00",
+      "line_total": "192.00"
+    },
+    {
+      "description": "ONION YEL 50LB",
+      "quantity": "6",
+      "unit": "BAG",
+      "unit_price": "24.00",
+      "line_total": "144.00"
+    }
+  ],
+  "subtotal": "523.10",
+  "tax": "0.00",
+  "total": "533.10",
+  "deliberate_errors": [
+    "wrong_total"
+  ]
+}

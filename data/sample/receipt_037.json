@@ -1,0 +1,40 @@
+{
+  "file": "receipt_037.jpg",
+  "vendor": "Metro Restaurant Supply",
+  "date": "2026-10-03",
+  "receipt_number": "MRS702548",
+  "lines": [
+    {
+      "description": "TO-GO BOX 9X9 200CT",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "40.61",
+      "line_total": "162.44"
+    },
+    {
+      "description": "NAPKINS 6000CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "30.04",
+      "line_total": "90.12"
+    },
+    {
+      "description": "RICE JASMINE 25 LB",
+      "quantity": "6",
+      "unit": "BAG",
+      "unit_price": "28.14",
+      "line_total": "168.84"
+    },
+    {
+      "description": "GLOVES NITRILE L 100CT",
+      "quantity": "6",
+      "unit": "BX",
+      "unit_price": "9.84",
+      "line_total": "59.04"
+    }
+  ],
+  "subtotal": "480.44",
+  "tax": "39.64",
+  "total": "520.08",
+  "deliberate_errors": []
+}

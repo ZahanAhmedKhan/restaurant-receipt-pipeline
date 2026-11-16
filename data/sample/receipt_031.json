@@ -1,0 +1,56 @@
+{
+  "file": "receipt_031.jpg",
+  "vendor": "Sunrise Meat Co.",
+  "date": "2026-09-16",
+  "receipt_number": "SMC-3319",
+  "lines": [
+    {
+      "description": "BEEF BRISKET",
+      "quantity": "14.57",
+      "unit": "LB",
+      "unit_price": "4.79",
+      "line_total": "69.79"
+    },
+    {
+      "description": "CHICKEN BREAST BNLS 10 LB",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "31.00",
+      "line_total": "124.00"
+    },
+    {
+      "description": "LAMB LEG BNLS 4.5KG",
+      "quantity": "4",
+      "unit": "EA",
+      "unit_price": "73.87",
+      "line_total": "295.48"
+    },
+    {
+      "description": "GROUND BEEF 80/20 10 LB",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "47.20",
+      "line_total": "236.00"
+    },
+    {
+      "description": "GOAT CUBES",
+      "quantity": "24.45",
+      "unit": "LB",
+      "unit_price": "6.23",
+      "line_total": "152.32"
+    },
+    {
+      "description": "CHKN THIGH BNLS 10LB",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "27.57",
+      "line_total": "137.85"
+    }
+  ],
+  "subtotal": "1015.44",
+  "tax": "0.00",
+  "total": "1016.34",
+  "deliberate_errors": [
+    "wrong_total"
+  ]
+}

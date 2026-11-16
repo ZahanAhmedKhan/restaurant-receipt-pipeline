@@ -1,0 +1,54 @@
+{
+  "file": "receipt_005.jpg",
+  "vendor": "Metro Restaurant Supply",
+  "date": "2026-06-12",
+  "receipt_number": "MRS702319",
+  "lines": [
+    {
+      "description": "OIL CANOLA 35 LB",
+      "quantity": "6",
+      "unit": "JUG",
+      "unit_price": "43.10",
+      "line_total": "258.60"
+    },
+    {
+      "description": "GLOVES NITRILE L 100CT",
+      "quantity": "5",
+      "unit": "BX",
+      "unit_price": "9.80",
+      "line_total": "49.00"
+    },
+    {
+      "description": "NAPKINS 6000CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "31.20",
+      "line_total": "93.60"
+    },
+    {
+      "description": "RICE JASMINE 25 LB",
+      "quantity": "5",
+      "unit": "BAG",
+      "unit_price": "29.25",
+      "line_total": "146.25"
+    },
+    {
+      "description": "TO-GO BOX 9X9 200CT",
+      "quantity": "2",
+      "unit": "CS",
+      "unit_price": "38.40",
+      "line_total": "76.80"
+    },
+    {
+      "description": "FOIL ROLL 18IN",
+      "quantity": "6",
+      "unit": "EA",
+      "unit_price": "24.60",
+      "line_total": "147.60"
+    }
+  ],
+  "subtotal": "771.85",
+  "tax": "63.68",
+  "total": "835.53",
+  "deliberate_errors": []
+}

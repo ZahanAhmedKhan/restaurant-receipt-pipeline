@@ -1,0 +1,33 @@
+{
+  "file": "receipt_035.jpg",
+  "vendor": "Sunrise Meat Co.",
+  "date": "2026-09-24",
+  "receipt_number": "SMC-3198",
+  "lines": [
+    {
+      "description": "GROUND BEEF 80/20 10 LB",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "47.20",
+      "line_total": "141.60"
+    },
+    {
+      "description": "GOAT CUBES",
+      "quantity": "8.46",
+      "unit": "LB",
+      "unit_price": "6.23",
+      "line_total": "52.71"
+    },
+    {
+      "description": "CHICKEN BREAST BNLS 10 LB",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "31.00",
+      "line_total": "155.00"
+    }
+  ],
+  "subtotal": "349.31",
+  "tax": "0.00",
+  "total": "349.31",
+  "deliberate_errors": []
+}

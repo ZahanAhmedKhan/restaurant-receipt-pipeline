@@ -1,0 +1,47 @@
+{
+  "file": "receipt_003.png",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-06-07",
+  "receipt_number": "HF-10210",
+  "lines": [
+    {
+      "description": "OIL CANOLA 35LB",
+      "quantity": "5",
+      "unit": "JUG",
+      "unit_price": "41.20",
+      "line_total": "206.00"
+    },
+    {
+      "description": "GRND BEEF 80/20 10LB",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "48.00",
+      "line_total": "192.00"
+    },
+    {
+      "description": "ONION YEL 50LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "24.00",
+      "line_total": "24.00"
+    },
+    {
+      "description": "CHKN BRST 10LB",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "32.50",
+      "line_total": "32.50"
+    },
+    {
+      "description": "FLOUR AP 50LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "22.40",
+      "line_total": "22.40"
+    }
+  ],
+  "subtotal": "476.90",
+  "tax": "0.00",
+  "total": "476.90",
+  "deliberate_errors": []
+}

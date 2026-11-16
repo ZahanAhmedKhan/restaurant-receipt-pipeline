@@ -1,0 +1,54 @@
+{
+  "file": "receipt_001.jpg",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-06-01",
+  "receipt_number": "HF-10337",
+  "lines": [
+    {
+      "description": "FLOUR AP 50LB",
+      "quantity": "6",
+      "unit": "BAG",
+      "unit_price": "22.40",
+      "line_total": "134.40"
+    },
+    {
+      "description": "ONION YEL 50LB",
+      "quantity": "5",
+      "unit": "BAG",
+      "unit_price": "24.00",
+      "line_total": "120.00"
+    },
+    {
+      "description": "OIL CANOLA 35LB",
+      "quantity": "6",
+      "unit": "JUG",
+      "unit_price": "41.20",
+      "line_total": "247.20"
+    },
+    {
+      "description": "RICE JASMINE 25LB",
+      "quantity": "6",
+      "unit": "BAG",
+      "unit_price": "27.75",
+      "line_total": "166.50"
+    },
+    {
+      "description": "EGGS LG 15DZ",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "39.90",
+      "line_total": "159.60"
+    },
+    {
+      "description": "TOMATO 25LB",
+      "quantity": "2",
+      "unit": "CS",
+      "unit_price": "29.50",
+      "line_total": "59.00"
+    }
+  ],
+  "subtotal": "886.70",
+  "tax": "0.00",
+  "total": "886.70",
+  "deliberate_errors": []
+}

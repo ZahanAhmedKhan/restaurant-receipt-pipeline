@@ -1,0 +1,47 @@
+{
+  "file": "receipt_021.png",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-08-03",
+  "receipt_number": "HF-10401",
+  "lines": [
+    {
+      "description": "RICE JASMINE 25LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "27.74",
+      "line_total": "27.74"
+    },
+    {
+      "description": "ONION YEL 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "23.94",
+      "line_total": "95.76"
+    },
+    {
+      "description": "EGGS LG 15DZ",
+      "quantity": "2",
+      "unit": "CS",
+      "unit_price": "39.49",
+      "line_total": "78.98"
+    },
+    {
+      "description": "CHKN BRST 10LB",
+      "quantity": "2",
+      "unit": "CS",
+      "unit_price": "32.41",
+      "line_total": "64.82"
+    },
+    {
+      "description": "OIL CANOLA 35LB",
+      "quantity": "4",
+      "unit": "JUG",
+      "unit_price": "40.48",
+      "line_total": "161.92"
+    }
+  ],
+  "subtotal": "429.22",
+  "tax": "0.00",
+  "total": "429.22",
+  "deliberate_errors": []
+}

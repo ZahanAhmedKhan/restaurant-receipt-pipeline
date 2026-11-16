@@ -1,0 +1,40 @@
+{
+  "file": "receipt_023.jpg",
+  "vendor": "Golden Valley Produce",
+  "date": "2026-08-15",
+  "receipt_number": "GVP500184",
+  "lines": [
+    {
+      "description": "ONIONS YELLOW 50 LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "21.35",
+      "line_total": "21.35"
+    },
+    {
+      "description": "CILANTRO 30CT",
+      "quantity": "6",
+      "unit": "CS",
+      "unit_price": "18.34",
+      "line_total": "110.04"
+    },
+    {
+      "description": "LEMONS 115CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "37.48",
+      "line_total": "112.44"
+    },
+    {
+      "description": "GARLIC PEELED 5LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "16.87",
+      "line_total": "16.87"
+    }
+  ],
+  "subtotal": "260.70",
+  "tax": "0.00",
+  "total": "260.70",
+  "deliberate_errors": []
+}

@@ -1,0 +1,47 @@
+{
+  "file": "receipt_008.jpg",
+  "vendor": "Golden Valley Produce",
+  "date": "2026-07-04",
+  "receipt_number": "GVP500203",
+  "lines": [
+    {
+      "description": "TOMATOES ROMA 25 LB",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "31.39",
+      "line_total": "125.56"
+    },
+    {
+      "description": "PEPPER GREEN BELL 25LB",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "28.49",
+      "line_total": "142.45"
+    },
+    {
+      "description": "LETTUCE ROMAINE 24CT",
+      "quantity": "6",
+      "unit": "CS",
+      "unit_price": "34.06",
+      "line_total": "204.36"
+    },
+    {
+      "description": "LEMONS 115CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "37.74",
+      "line_total": "113.22"
+    },
+    {
+      "description": "GARLIC PEELED 5LB",
+      "quantity": "5",
+      "unit": "BAG",
+      "unit_price": "16.69",
+      "line_total": "83.45"
+    }
+  ],
+  "subtotal": "669.04",
+  "tax": "0.00",
+  "total": "669.04",
+  "deliberate_errors": []
+}

@@ -1,0 +1,33 @@
+{
+  "file": "receipt_042.png",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-10-24",
+  "receipt_number": "HF-10275",
+  "lines": [
+    {
+      "description": "GRND BEEF 80/20 10LB",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "48.33",
+      "line_total": "48.33"
+    },
+    {
+      "description": "EGGS LG 15DZ",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "39.09",
+      "line_total": "195.45"
+    },
+    {
+      "description": "OIL CANOLA 35LB",
+      "quantity": "2",
+      "unit": "JUG",
+      "unit_price": "39.75",
+      "line_total": "79.50"
+    }
+  ],
+  "subtotal": "323.28",
+  "tax": "0.00",
+  "total": "323.28",
+  "deliberate_errors": []
+}

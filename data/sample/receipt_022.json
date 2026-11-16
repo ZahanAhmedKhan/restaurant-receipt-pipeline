@@ -1,0 +1,54 @@
+{
+  "file": "receipt_022.jpg",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-08-10",
+  "receipt_number": "HF-10468",
+  "lines": [
+    {
+      "description": "GRND BEEF 80/20 10LB",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "48.17",
+      "line_total": "144.51"
+    },
+    {
+      "description": "EGGS LG 15DZ",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "39.49",
+      "line_total": "197.45"
+    },
+    {
+      "description": "RICE JASMINE 25LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "27.74",
+      "line_total": "27.74"
+    },
+    {
+      "description": "TOMATO 25LB",
+      "quantity": "2",
+      "unit": "CS",
+      "unit_price": "29.45",
+      "line_total": "58.90"
+    },
+    {
+      "description": "ONION YEL 50LB",
+      "quantity": "2",
+      "unit": "BAG",
+      "unit_price": "23.94",
+      "line_total": "47.88"
+    },
+    {
+      "description": "FLOUR AP 50LB",
+      "quantity": "2",
+      "unit": "BAG",
+      "unit_price": "22.80",
+      "line_total": "45.60"
+    }
+  ],
+  "subtotal": "522.08",
+  "tax": "0.00",
+  "total": "522.08",
+  "deliberate_errors": []
+}

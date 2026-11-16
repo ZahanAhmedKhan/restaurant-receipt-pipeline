@@ -1,0 +1,47 @@
+{
+  "file": "receipt_033.png",
+  "vendor": "Golden Valley Produce",
+  "date": "2026-09-19",
+  "receipt_number": "GVP500169",
+  "lines": [
+    {
+      "description": "GARLIC PEELED 5LB",
+      "quantity": "1",
+      "unit": "BAG",
+      "unit_price": "17.06",
+      "line_total": "17.06"
+    },
+    {
+      "description": "POTATO RUSSET 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "26.67",
+      "line_total": "106.68"
+    },
+    {
+      "description": "PEPPER GREEN BELL 25LB",
+      "quantity": "6",
+      "unit": "CS",
+      "unit_price": "27.97",
+      "line_total": "167.82"
+    },
+    {
+      "description": "ONIONS YELLOW 50 LB",
+      "quantity": "3",
+      "unit": "BAG",
+      "unit_price": "21.16",
+      "line_total": "63.48"
+    },
+    {
+      "description": "CILANTRO 30CT",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "18.51",
+      "line_total": "18.51"
+    }
+  ],
+  "subtotal": "373.55",
+  "tax": "0.00",
+  "total": "373.55",
+  "deliberate_errors": []
+}

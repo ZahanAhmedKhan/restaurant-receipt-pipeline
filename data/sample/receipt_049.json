@@ -1,0 +1,43 @@
+{
+  "file": "receipt_049.png",
+  "vendor": "Golden Valley Produce",
+  "date": "2026-07-10",
+  "receipt_number": "GVP500328",
+  "lines": [
+    {
+      "description": "TOMATOES ROMA 25 LB",
+      "quantity": "5",
+      "unit": "CS",
+      "unit_price": "31.39",
+      "line_total": "156.95"
+    },
+    {
+      "description": "POTATO RUSSET 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "26.56",
+      "line_total": "106.24"
+    },
+    {
+      "description": "GARLIC PEELED 5LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "16.69",
+      "line_total": "66.76"
+    },
+    {
+      "description": "LETTUCE ROMAINE 24CT",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "34.06",
+      "line_total": "34.06"
+    }
+  ],
+  "subtotal": "364.01",
+  "tax": "0.00",
+  "total": "364.01",
+  "deliberate_errors": [
+    "duplicate_receipt"
+  ],
+  "duplicate_of": "receipt_011"
+}

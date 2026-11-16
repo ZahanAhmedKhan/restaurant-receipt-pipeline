@@ -1,0 +1,33 @@
+{
+  "file": "receipt_004.jpg",
+  "vendor": "Harbor Fresh Foods",
+  "date": "2026-06-07",
+  "receipt_number": "HF-10450",
+  "lines": [
+    {
+      "description": "OIL CANOLA 35LB",
+      "quantity": "1",
+      "unit": "JUG",
+      "unit_price": "41.20",
+      "line_total": "41.20"
+    },
+    {
+      "description": "TOMATO 25LB",
+      "quantity": "4",
+      "unit": "CS",
+      "unit_price": "29.50",
+      "line_total": "118.00"
+    },
+    {
+      "description": "FLOUR AP 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "22.40",
+      "line_total": "89.60"
+    }
+  ],
+  "subtotal": "248.80",
+  "tax": "0.00",
+  "total": "248.80",
+  "deliberate_errors": []
+}

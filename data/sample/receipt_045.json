@@ -1,0 +1,40 @@
+{
+  "file": "receipt_045.png",
+  "vendor": "Metro Restaurant Supply",
+  "date": "2026-10-29",
+  "receipt_number": "MRS702381",
+  "lines": [
+    {
+      "description": "GLOVES NITRILE L 100CT",
+      "quantity": "1",
+      "unit": "BX",
+      "unit_price": "9.84",
+      "line_total": "9.84"
+    },
+    {
+      "description": "DISH SOAP 1GAL",
+      "quantity": "1",
+      "unit": "EA",
+      "unit_price": "12.35",
+      "line_total": "12.35"
+    },
+    {
+      "description": "RICE JASMINE 25 LB",
+      "quantity": "3",
+      "unit": "BAG",
+      "unit_price": "28.14",
+      "line_total": "84.42"
+    },
+    {
+      "description": "FOIL ROLL 18IN",
+      "quantity": "1",
+      "unit": "EA",
+      "unit_price": "24.92",
+      "line_total": "24.92"
+    }
+  ],
+  "subtotal": "131.53",
+  "tax": "10.85",
+  "total": "142.38",
+  "deliberate_errors": []
+}

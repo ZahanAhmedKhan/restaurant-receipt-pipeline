@@ -1,0 +1,40 @@
+{
+  "file": "receipt_048.png",
+  "vendor": "Metro Restaurant Supply",
+  "date": "2026-11-06",
+  "receipt_number": "MRS702459",
+  "lines": [
+    {
+      "description": "FOIL ROLL 18IN",
+      "quantity": "1",
+      "unit": "EA",
+      "unit_price": "25.00",
+      "line_total": "25.00"
+    },
+    {
+      "description": "DISH SOAP 1GAL",
+      "quantity": "2",
+      "unit": "EA",
+      "unit_price": "12.24",
+      "line_total": "24.48"
+    },
+    {
+      "description": "RICE JASMINE 25 LB",
+      "quantity": "6",
+      "unit": "BAG",
+      "unit_price": "27.87",
+      "line_total": "167.22"
+    },
+    {
+      "description": "NAPKINS 6000CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "29.74",
+      "line_total": "89.22"
+    }
+  ],
+  "subtotal": "305.92",
+  "tax": "25.24",
+  "total": "331.16",
+  "deliberate_errors": []
+}

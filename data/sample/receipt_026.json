@@ -1,0 +1,40 @@
+{
+  "file": "receipt_026.jpg",
+  "vendor": "Golden Valley Produce",
+  "date": "2026-08-18",
+  "receipt_number": "GVP500240",
+  "lines": [
+    {
+      "description": "POTATO RUSSET 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "26.61",
+      "line_total": "106.44"
+    },
+    {
+      "description": "ONIONS YELLOW 50 LB",
+      "quantity": "3",
+      "unit": "BAG",
+      "unit_price": "21.35",
+      "line_total": "64.05"
+    },
+    {
+      "description": "LEMONS 115CT",
+      "quantity": "3",
+      "unit": "CS",
+      "unit_price": "37.48",
+      "line_total": "112.44"
+    },
+    {
+      "description": "TOMATOES ROMA 25 LB",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "31.78",
+      "line_total": "31.78"
+    }
+  ],
+  "subtotal": "314.71",
+  "tax": "0.00",
+  "total": "314.71",
+  "deliberate_errors": []
+}
