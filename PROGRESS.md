@@ -14,9 +14,14 @@
   Deliberate errors: 3 wrong totals, 1 subtotal that doesn't match its lines. One item has a planned
   15% price jump from September 2026 for the price-alert feature.
 
+- **M1.2 Ingestion:** `sql/001_raw.sql` (`raw.receipt_file`, `raw.ocr_run`), `src/ingest.py` with
+  `ingest_image_bytes()` (JPG/PNG only, real format checked with Pillow, 10 MB and 50 MP limits,
+  saved as `data/raw/<sha256>.<ext>`, duplicates detected by hash) and `scan_inbox()` (skips files
+  newer than 10 s, moves rejected files to `data/failed/`). Fixed `setup_db.py` so each SQL file commits.
+
 ## Next
 
-- **M1.2 Ingestion:** `sql/001_raw.sql`, `src/ingest.py`.
+- **M2.1 Tesseract OCR:** `src/ocr.py`.
 
 ## Open issues
 
@@ -50,3 +55,14 @@
 - JSON files
 - SHA-256 file hashes
 - pytest `parametrize`
+
+### M1.2
+- `GENERATED ALWAYS AS IDENTITY` primary keys, `UNIQUE`, `CHECK` constraints, foreign keys
+- Content hashing for deduplication (SHA-256)
+- Idempotency (`ON CONFLICT DO NOTHING`)
+- Validating untrusted files (magic bytes vs. extension, `Image.verify()`, decompression bombs)
+- Path traversal and why we never use the original filename as a path
+- Parameterized queries (`%s`)
+- Python `logging`
+- pytest `tmp_path` and `monkeypatch`
+- Implicit transactions vs. savepoints in psycopg
