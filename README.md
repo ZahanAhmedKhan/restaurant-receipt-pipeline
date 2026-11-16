@@ -59,6 +59,15 @@ python -c "import pandas, psycopg, pytesseract, PIL; print('imports ok')"
 tesseract --version
 ```
 
+## Running the pipeline
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m src.run_pipeline --sample   # load the 50 fake receipts (demo)
+python -m src.run_pipeline            # process new photos dropped into data\inbox\
+python -m pytest -q                   # run the tests (uses the receipts_test database)
+```
+
 ## Results
 
 To be filled in with measured numbers only.

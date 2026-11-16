@@ -49,12 +49,7 @@ def applied_versions(conn):
 def apply_migrations(conn, sql_dir=config.SQL_DIR):
     """Run every file not yet applied. Returns the list of names applied now."""
     conn.execute(CREATE_VERSION_TABLE)
-    conn.commit()
-
     done = applied_versions(conn)
-    # End the read transaction, so each conn.transaction() below is a real
-    # transaction that commits on its own (not a savepoint inside the read).
-    conn.commit()
     applied_now = []
     for path in list_migration_files(sql_dir):
         if path.name in done:

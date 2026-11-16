@@ -79,16 +79,15 @@ def ocr_file(conn, file_id, method=None):
 
     try:
         result = run_tesseract(path)
-        ocr_run_id = save_ocr_run(conn, file_id, "tesseract", raw_text=result["text"],
-                                  duration_ms=result["duration_ms"])
-        set_file_status(conn, file_id, "ocr_done")
+        with conn.transaction():   # OCR row and status change saved together
+            ocr_run_id = save_ocr_run(conn, file_id, "tesseract", raw_text=result["text"],
+                                      duration_ms=result["duration_ms"])
+            set_file_status(conn, file_id, "ocr_done")
         logger.info("OCR done file_id=%s ocr_run_id=%s method=%s", file_id, ocr_run_id, method)
     except Exception as error:
-        conn.rollback()
         ocr_run_id = save_ocr_run(conn, file_id, method, error=type(error).__name__)
         set_file_status(conn, file_id, "failed")
         logger.warning("OCR failed file_id=%s error=%s", file_id, type(error).__name__)
-    conn.commit()
     return ocr_run_id
 
 

@@ -46,7 +46,6 @@ def db_conn(migrated_db):
     conn = db.get_connection()
     _truncate_all(conn)
     yield conn
-    conn.rollback()
     conn.close()
 
 
@@ -65,4 +64,3 @@ def _truncate_all(conn):
     if tables:
         # Table names come from the catalog, not from user input
         conn.execute("TRUNCATE " + ", ".join(tables) + " RESTART IDENTITY CASCADE")
-    conn.commit()

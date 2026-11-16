@@ -30,9 +30,17 @@
   token found from the right. Safe OCR fixes only inside number tokens (O/@ -> 0, l/I -> 1, trailing
   comma). Unreadable values become `None`.
 
+- **M2.3 Cleaning + loading:** `sql/002_clean.sql` (`clean.vendor_mapping` seeded with the 4 fake
+  vendors, `clean.receipt`, `clean.receipt_line`, `clean.correction`), `src/clean.py` (pandas cleaning:
+  dates in 6 formats, money as `Decimal`, vendor mapping with close-match for OCR typos, whitespace/case;
+  raw values kept next to clean ones), `src/run_pipeline.py` (ingest -> OCR -> clean, `--sample` copies the
+  fake receipts into the inbox). DB connections now use autocommit + explicit `conn.transaction()` blocks.
+  Measured on the sample set: 50 files -> 49 receipts loaded, 1 exact duplicate caught; a second run
+  loaded 0 new receipts.
+
 ## Next
 
-- **M2.3 Cleaning + loading:** `sql/002_clean.sql`, `src/clean.py`, `src/run_pipeline.py`.
+- **M3.1 Quality checks:** `sql/003_dq.sql`, `src/quality.py`.
 
 ## Open issues
 
@@ -91,3 +99,14 @@
 - Common OCR character confusions
 - "Never guess": `None` for missing data
 - Unit tests with fixed input strings
+
+### M2.3
+- pandas DataFrames, `Series.map`, `dtype=object`, NaN vs. None
+- Date parsing with `strptime` formats
+- `Decimal` vs. float for money, `NUMERIC(12,2)`
+- Fuzzy string matching (`difflib.get_close_matches`)
+- Raw vs. clean columns side by side (auditability)
+- Autocommit vs. explicit transactions
+- `ON DELETE CASCADE`, `UNIQUE (receipt_id, line_no)`
+- Idempotent pipeline steps driven by a status column
+- `argparse` command-line options

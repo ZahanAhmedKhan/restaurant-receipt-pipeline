@@ -128,7 +128,6 @@ def ingest_image_bytes(data, original_name, source, conn=None, raw_dir=None):
             """,
             (sha256, stored_path_text(target), safe_label(original_name), source),
         ).fetchone()
-        conn.commit()
 
         if row is None:
             # Another process inserted the same file a moment ago
