@@ -1,0 +1,32 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Secrets (only .env.example is committed)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Receipt data: real or in-progress images never go in Git.
+# The folders stay (via .gitkeep), their contents are ignored.
+data/inbox/*
+!data/inbox/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/failed/*
+!data/failed/.gitkeep
+data/private/
+
+# Outputs
+exports/
+*.xlsx
+logs/
+*.log
+*.lock
+
+# Local editor / tool settings
+.vscode/
+.claude/settings.local.json
