@@ -4,6 +4,7 @@ that is already done.
     1. ingest   data/inbox/ -> data/raw/ + raw.receipt_file
     2. OCR      files with status 'new'      -> raw.ocr_run
     3. clean    files with status 'ocr_done' -> clean.receipt / clean.receipt_line
+    4. quality  checks on the new receipts   -> dq.check_result, review_status
 
 Usage:
     python -m src.run_pipeline              # process whatever is in data/inbox/
@@ -14,7 +15,7 @@ import argparse
 import logging
 import shutil
 
-from src import clean, config, ingest, ocr
+from src import clean, config, ingest, ocr, quality
 from src.db import get_connection
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,11 @@ def run(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None):
                                           raw_dir=raw_dir, failed_dir=failed_dir)
         ocr_count = ocr.ocr_pending(conn)
         receipt_ids = clean.process_pending(conn)
+        needs_review = 0
+        for receipt_id in receipt_ids:
+            results = quality.run_checks(conn, receipt_id)
+            if not all(passed for passed, _ in results.values()):
+                needs_review += 1
         summary = {
             "ingested_new": ingest_counts["new"],
             "duplicates": ingest_counts["duplicate"],
@@ -52,6 +58,7 @@ def run(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None):
             "skipped_still_copying": ingest_counts["skipped"],
             "ocr_runs": ocr_count,
             "receipts_loaded": len(receipt_ids),
+            "needs_review": needs_review,
         }
         logger.info("Pipeline summary: %s", summary)
         return summary

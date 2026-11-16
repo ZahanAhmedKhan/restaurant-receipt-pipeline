@@ -124,7 +124,10 @@ def test_loaded_receipt_values(db_conn, tmp_path):
     ).fetchone()
     assert vendor == "Harbor Fresh Foods"
     assert number == "HF-10210"
-    assert status == "pending"
+    # OCR misreads one quantity on this receipt, so quality checks may flag it
+    assert status in ("pending", "needs_review")
+    checks = db_conn.execute("SELECT count(*) FROM dq.check_result").fetchone()[0]
+    assert checks == 6
     file_status = db_conn.execute("SELECT status FROM raw.receipt_file").fetchone()[0]
     assert file_status == "parsed"
     assert _count(db_conn, "clean.receipt_line") > 0

@@ -38,13 +38,23 @@
   Measured on the sample set: 50 files -> 49 receipts loaded, 1 exact duplicate caught; a second run
   loaded 0 new receipts.
 
+- **M3.1 Quality checks:** `sql/003_dq.sql` (`dq.check_result`), `src/quality.py` with 6 checks:
+  required fields (incl. every line value), valid/future date, no negatives, lines add up to subtotal
+  (2-cent tolerance), total = subtotal + tax, duplicate (same vendor + number + total on an earlier receipt).
+  Results replace the receipt's previous results; failure -> `needs_review`, all pass -> `pending`;
+  approved/rejected receipts keep their status. Added to `run_pipeline.py`.
+  Measured on the 49 sample receipts: 8 pending, 41 needs_review. Failures by check: required_fields 40,
+  lines_match_subtotal 20, total_is_subtotal_plus_tax 6, not_duplicate 1, valid_date 0, no_negative_values 0.
+  Both planted duplicates are caught (exact file at ingestion, re-photographed copy here).
+
 ## Next
 
-- **M3.1 Quality checks:** `sql/003_dq.sql`, `src/quality.py`.
+- **M3.2 Receipt capture page:** `app/Home.py`, `app/pages/1_Add_Receipt.py`.
 
 ## Open issues
 
-- None yet.
+- Tesseract often misreads single-digit quantities (especially "1") and sometimes whole price columns on
+  blurred images, so most sample receipts need review. To be compared with Gemini in M5.2.
 
 ## Concepts to study later
 
@@ -110,3 +120,10 @@
 - `ON DELETE CASCADE`, `UNIQUE (receipt_id, line_no)`
 - Idempotent pipeline steps driven by a status column
 - `argparse` command-line options
+
+### M3.1
+- Data quality dimensions (completeness, validity, consistency, uniqueness)
+- Tolerances when comparing money
+- Rule-based validation and review queues
+- Replace-on-rerun (delete + insert in one transaction)
+- `count(*) FILTER (WHERE ...)` and partial indexes
