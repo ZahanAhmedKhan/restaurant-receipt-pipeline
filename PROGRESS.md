@@ -47,9 +47,16 @@
   lines_match_subtotal 20, total_is_subtotal_plus_tax 6, not_duplicate 1, valid_date 0, no_negative_values 0.
   Both planted duplicates are caught (exact file at ingestion, re-photographed copy here).
 
+- **M3.2 Receipt capture page:** `app/Home.py` (password gate, status counts), `app/pages/1_Add_Receipt.py`
+  (Take Photo / Upload Receipt tabs, preview, Submit, status messages, camera help), `app/app_common.py`
+  (page setup + password check on every page), `src/auth.py` (salted PBKDF2 hash),
+  `scripts/set_app_password.py`, `process_single_image()` in `run_pipeline.py`,
+  `.streamlit/config.toml` (static serving off, 10 MB upload limit). README: app and phone (Tailscale) setup.
+  Tests include Streamlit `AppTest` checks of the password gate.
+
 ## Next
 
-- **M3.2 Receipt capture page:** `app/Home.py`, `app/pages/1_Add_Receipt.py`.
+- **M3.3 Review page:** `app/pages/2_Review.py`.
 
 ## Open issues
 
@@ -127,3 +134,10 @@
 - Rule-based validation and review queues
 - Replace-on-rerun (delete + insert in one transaction)
 - `count(*) FILTER (WHERE ...)` and partial indexes
+
+### M3.2
+- Streamlit basics: script reruns, widgets, `st.session_state`, `st.stop()`, tabs, forms
+- Streamlit multipage apps and `st.cache_resource`
+- Password hashing with salt (PBKDF2), constant-time comparison
+- Why browsers need HTTPS for the camera; Tailscale private networks
+- Testing Streamlit pages with `AppTest`

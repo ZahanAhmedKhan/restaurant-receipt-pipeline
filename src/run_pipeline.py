@@ -67,6 +67,44 @@ def run(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None):
             conn.close()
 
 
+def process_single_image(conn, data, original_name, source, raw_dir=None):
+    """Run one image through every step right away (used by the capture page).
+
+    Returns a dict:
+        {"status": "new" | "duplicate" | "rejected" | "ocr_failed",
+         "file_id": ..., "receipt_id": ..., "reason": ..., "needs_review": bool}
+    """
+    status, value = ingest.ingest_image_bytes(data, original_name, source, conn=conn,
+                                              raw_dir=raw_dir)
+    result = {"status": status, "file_id": None, "receipt_id": None,
+              "reason": None, "needs_review": False}
+
+    if status == "rejected":
+        result["reason"] = value
+        return result
+
+    file_id = value
+    result["file_id"] = file_id
+    if status == "duplicate":
+        row = conn.execute("SELECT receipt_id FROM clean.receipt WHERE file_id = %s",
+                           (file_id,)).fetchone()
+        result["receipt_id"] = row[0] if row else None
+        return result
+
+    ocr.ocr_file(conn, file_id)
+    file_status = conn.execute("SELECT status FROM raw.receipt_file WHERE file_id = %s",
+                               (file_id,)).fetchone()[0]
+    if file_status != "ocr_done":
+        result["status"] = "ocr_failed"
+        return result
+
+    receipt_id = clean.process_file(conn, file_id)
+    checks = quality.run_checks(conn, receipt_id)
+    result["receipt_id"] = receipt_id
+    result["needs_review"] = not all(passed for passed, _ in checks.values())
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run the receipt pipeline.")
     parser.add_argument("--sample", action="store_true",

@@ -1,0 +1,12 @@
+[server]
+# Never serve files from a static folder: receipt images are only shown
+# inside the password-protected app (read from data/raw/ and passed to st.image).
+enableStaticServing = false
+# Uploads larger than this (MB) are refused by Streamlit itself
+maxUploadSize = 10
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"

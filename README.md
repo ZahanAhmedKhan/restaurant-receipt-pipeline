@@ -68,6 +68,34 @@ python -m src.run_pipeline            # process new photos dropped into data\inb
 python -m pytest -q                   # run the tests (uses the receipts_test database)
 ```
 
+## The app (Streamlit)
+
+```powershell
+python scripts\set_app_password.py    # one time: choose the app password (saved only as a hash)
+streamlit run app\Home.py             # opens http://localhost:8501
+```
+
+Pages: **Add Receipt** (camera or upload), **Review**.
+
+## Using on a phone
+
+Browsers only allow the camera on **HTTPS** pages or on `localhost`. A phone opening
+`http://<laptop-ip>:8501` can still use **Upload Receipt** (which can take a photo with the phone's
+camera app), but not **Take Photo**.
+
+Chosen setup: **Tailscale** (free personal plan). It gives a private HTTPS address that only your
+own devices can open. Nothing is put on the public internet.
+
+1. Install Tailscale on the laptop (https://tailscale.com/download) and sign in.
+2. Install the Tailscale app on each phone and sign in with the same account.
+3. In the Tailscale admin console, under **DNS**, turn on **MagicDNS** and **HTTPS certificates**.
+4. Start the app on the laptop: `streamlit run app\Home.py`
+5. In a second terminal on the laptop: `tailscale serve --bg 8501`
+6. It prints an address like `https://<laptop-name>.<tailnet>.ts.net`. Open it on the phone.
+7. To stop sharing: `tailscale serve reset`
+
+Do **not** use public tunnels (ngrok, Cloudflare quick tunnels, etc.) with real receipts.
+
 ## Results
 
 To be filled in with measured numbers only.
