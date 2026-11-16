@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+# Streamlit adds app/ to the path when it runs app/Home.py; tests that run
+# a page file directly need the same, so pages can `import app_common`.
+sys.path.insert(0, str(PROJECT_ROOT / "app"))
 
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 os.environ["DB_NAME"] = os.getenv("DB_TEST_NAME", "receipts_test")

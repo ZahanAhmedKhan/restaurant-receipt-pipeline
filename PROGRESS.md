@@ -54,9 +54,14 @@
   `.streamlit/config.toml` (static serving off, 10 MB upload limit). README: app and phone (Tailscale) setup.
   Tests include Streamlit `AppTest` checks of the password gate.
 
+- **M3.3 Review page:** `app/pages/2_Review.py` (image next to fields, failed checks, editable header
+  and line table with add/delete rows, approve / reject / reopen, change history) and `src/review.py`
+  (`save_corrections()` logs every changed field in `clean.correction` and reruns quality checks;
+  `set_review_status()` logs status changes). Values are compared by value, so `2` and `2.000` are equal.
+
 ## Next
 
-- **M3.3 Review page:** `app/pages/2_Review.py`.
+- **M3.4 Excel export:** `src/export_excel.py` + download button.
 
 ## Open issues
 
@@ -141,3 +146,10 @@
 - Password hashing with salt (PBKDF2), constant-time comparison
 - Why browsers need HTTPS for the camera; Tailscale private networks
 - Testing Streamlit pages with `AppTest`
+
+### M3.3
+- Human-in-the-loop review workflow and status lifecycle
+- Audit logs (who/what/old/new) for corrections
+- `st.data_editor` and `st.form`
+- Comparing values by type (Decimal equality) vs. by text
+- Re-validating data after edits

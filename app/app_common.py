@@ -21,9 +21,12 @@ from src.auth import verify_password  # noqa: E402
 from src.db import get_connection  # noqa: E402
 
 
-def setup_page(title):
-    """Page settings + password gate. Stops the page if not logged in."""
-    st.set_page_config(page_title=title, page_icon="🧾", layout="centered")
+def setup_page(title, layout="centered"):
+    """Page settings + password gate. Stops the page if not logged in.
+
+    "centered" works best on phones; the review page uses "wide".
+    """
+    st.set_page_config(page_title=title, page_icon="🧾", layout=layout)
     require_password()
 
 
