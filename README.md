@@ -39,7 +39,20 @@ Copy-Item .env.example .env
 ```
 Then edit `.env` with your real values.
 
-### 4. Check everything works
+### 4. Database (one time)
+
+Set `DB_APP_PASSWORD` and `DB_READONLY_PASSWORD` in `.env` (any long random strings), then:
+
+```powershell
+python scripts\bootstrap_db.py      # asks for the postgres superuser password
+python scripts\setup_db.py          # creates the tables; safe to run again
+```
+
+`bootstrap_db.py` creates the `receipts` and `receipts_test` databases, runs
+`sql/000_roles_and_schemas.sql` in both, and sets the two role passwords from `.env`.
+(You can also run `000_roles_and_schemas.sql` by hand in pgAdmin; see the comments at the top of the file.)
+
+### 5. Check everything works
 
 ```powershell
 python -c "import pandas, psycopg, pytesseract, PIL; print('imports ok')"
