@@ -25,9 +25,14 @@
   best, so no preprocessing. Sample receipts were regenerated with Courier New Bold: the old font's
   dotted zero was often read as 8 or @ (ground-truth JSON unchanged, only images).
 
+- **M2.2 Parsing:** `src/parse.py` turns OCR text into vendor, date (raw text), receipt number,
+  line items, subtotal, tax, total. Regex rules for header lines; item lines split around the unit
+  token found from the right. Safe OCR fixes only inside number tokens (O/@ -> 0, l/I -> 1, trailing
+  comma). Unreadable values become `None`.
+
 ## Next
 
-- **M2.2 Parsing:** `src/parse.py`.
+- **M2.3 Cleaning + loading:** `sql/002_clean.sql`, `src/clean.py`, `src/run_pipeline.py`.
 
 ## Open issues
 
@@ -79,3 +84,10 @@
 - Timing code with `time.perf_counter()`
 - Recording failures without losing data (error column + status)
 - `pathlib` path joining
+
+### M2.2
+- Regular expressions (`re`): groups, anchors `^ $`, `re.MULTILINE`, `re.IGNORECASE`
+- Parsing semi-structured text, tokenizing with `split()`
+- Common OCR character confusions
+- "Never guess": `None` for missing data
+- Unit tests with fixed input strings
