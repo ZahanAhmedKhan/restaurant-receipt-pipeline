@@ -264,6 +264,12 @@ def main():
     args = parser.parse_args()
 
     results = evaluate(args.method)
+    if results["errors"] == results["receipts"]:
+        # Every receipt failed: that's a setup problem (API key, model name,
+        # network), not an accuracy result. Don't overwrite the report with 0%.
+        print(f"All {results['receipts']} receipts failed with {args.method}; nothing saved. "
+              "Check the API key, GEMINI_MODEL and your internet connection.")
+        return
     all_results = save_results(results)
     REPORT_MD.write_text(render_report(all_results), encoding="utf-8")
     print(json.dumps(results, indent=2))
