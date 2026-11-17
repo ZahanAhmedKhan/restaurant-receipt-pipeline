@@ -68,6 +68,23 @@ python -m src.run_pipeline            # process new photos dropped into data\inb
 python -m pytest -q                   # run the tests (uses the receipts_test database)
 ```
 
+## OCR evaluation and the optional Gemini method
+
+```powershell
+python -m src.evaluate_ocr                   # Tesseract vs. ground truth -> docs\ocr_evaluation.md
+```
+
+To compare with Gemini (free tier): get an API key at https://aistudio.google.com/apikey, put it in
+`.env` as `GEMINI_API_KEY=...`, then run:
+
+```powershell
+python -m src.evaluate_ocr --method gemini   # adds a Gemini column to docs\ocr_evaluation.md
+```
+
+To use Gemini in the pipeline, also set `OCR_METHOD=gemini`. Gemini only ever receives the fake
+sample receipts (checked by file hash). Real receipts stay on Tesseract unless you set
+`ALLOW_EXTERNAL_AI_ON_PRIVATE=true`.
+
 ## The app (Streamlit)
 
 ```powershell

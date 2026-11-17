@@ -76,11 +76,20 @@
   total 96.0%; line items found 100%, fully correct 69.2% (quantity 78.8%, unit price 90.4%,
   line total 90.0% of matched lines); average 527 ms per receipt.
 
+- **M5.2 Gemini option:** `run_gemini()` in `src/ocr.py` asks Gemini (`google-genai` SDK) for JSON in the
+  `parse.py` structure (response schema, temperature 0). Used only when `OCR_METHOD=gemini` and a key is
+  set. Privacy guard: only images whose SHA-256 matches a sample receipt are sent, unless
+  `ALLOW_EXTERNAL_AI_ON_PRIVATE=true`; other files fall back to Tesseract. `clean.py` uses the stored JSON
+  directly. `evaluate_ocr.py --method gemini` adds a Gemini column to the report. Tests mock the API.
+
 ## Next
 
-- **M5.2 Gemini option:** `run_gemini()` in `src/ocr.py`, comparison.
+- **M6.1 Item normalization:** `src/normalize.py`, `mart.item_mapping`.
 
 ## Open issues
+
+- **Gemini comparison not run yet:** no `GEMINI_API_KEY` in `.env`. Add a key and run
+  `python -m src.evaluate_ocr --method gemini` to get measured Gemini numbers.
 
 - Tesseract often misreads single-digit quantities (especially "1") and sometimes whole price columns on
   blurred images, so most sample receipts need review. To be compared with Gemini in M5.2.
@@ -191,3 +200,10 @@
 - Fuzzy matching of records (`difflib.SequenceMatcher`), greedy one-to-one matching
 - Tolerances for money comparison
 - Reporting only measured numbers; limits of synthetic test data
+
+### M5.2
+- Vision LLMs for document extraction; structured output with a JSON schema
+- Calling an external API safely (keys in `.env`, privacy guard, fallback)
+- Mocking external services in tests (`monkeypatch`)
+- JSONB columns and `psycopg.types.json.Jsonb`
+- `functools.lru_cache`
