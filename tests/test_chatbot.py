@@ -179,7 +179,7 @@ def test_evaluate_counts_wrong_answers(mart, fake_gemini):
 def test_chatbot_page_without_key_explains_setup(mart, monkeypatch):
     monkeypatch.setattr(config, "GEMINI_API_KEY", None)
     app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "9_Chatbot.py"))
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     app.run()
     assert not app.exception
     assert "GEMINI_API_KEY" in app.info[0].value

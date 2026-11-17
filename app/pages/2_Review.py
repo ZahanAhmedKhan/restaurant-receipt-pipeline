@@ -1,10 +1,13 @@
-"""Review receipts: see the image next to what was read, fix mistakes,
+"""Check receipts: see the photo next to what was read, fix mistakes,
 then approve or reject. Every edit is logged in clean.correction.
+
+Staff see plain-English problems; the developer also sees check names
+and the change history.
 """
 
 import app_common
 
-app_common.setup_page("Review", layout="wide")
+app_common.setup_page("Check receipts", layout="wide")
 
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
@@ -13,26 +16,28 @@ from src import load_mart, review  # noqa: E402
 from src.ocr import resolve_stored_path  # noqa: E402
 
 STATUS_LABELS = {
-    "needs_review": "⚠️ Needs review",
-    "pending": "🕒 Pending approval",
+    "needs_review": "⚠️ Needs checking",
+    "pending": "🕒 Ready to approve",
     "approved": "✅ Approved",
     "rejected": "❌ Rejected",
 }
 
 conn = app_common.db()
-st.title("Review receipts")
+developer = app_common.is_developer()
+st.title("Check receipts")
 
 # --- pick a receipt ------------------------------------------------------------
 status = st.radio("Show", list(STATUS_LABELS), format_func=STATUS_LABELS.get, horizontal=True)
 receipts = review.list_receipts(conn, status)
 if not receipts:
-    st.info("No receipts here.")
+    st.info("Nothing here. 👍")
     st.stop()
 
 
 def receipt_label(row):
     receipt_id, vendor, receipt_date, total = row
-    return f"#{receipt_id} · {vendor or '?'} · {receipt_date or '?'} · {total if total is not None else '?'}"
+    total_text = f"${total:,.2f}" if total is not None else "total ?"
+    return f"Receipt #{receipt_id} · {vendor or 'supplier ?'} · {receipt_date or 'date ?'} · {total_text}"
 
 
 choice = st.selectbox("Receipt", receipts, format_func=receipt_label)
@@ -48,24 +53,27 @@ with image_col:
     if image_path.exists():
         st.image(image_path.read_bytes(), width="stretch")
     else:
-        st.error("The stored image file is missing.")
+        st.error("The photo for this receipt is missing.")
 
-# --- right: checks, fields, lines --------------------------------------------------
+# --- right: problems, fields, items --------------------------------------------------
 with fields_col:
     failed = [(name, details) for name, passed, details in data["checks"] if not passed]
     if failed:
         for name, details in failed:
-            st.error(f"**{name.replace('_', ' ')}**: {details}")
+            if developer:
+                st.error(f"**{name.replace('_', ' ')}**: {details}")
+            else:
+                st.error(review.friendly_problem(name, details))
     elif data["checks"]:
-        st.success("All quality checks passed.")
+        st.success("Everything looks right. Compare with the photo, then approve.")
 
     with st.form(f"edit_{receipt_id}"):
         st.caption(f"Status: {STATUS_LABELS[receipt['review_status']]}")
-        vendor = st.text_input("Vendor", receipt["vendor_name"] or "")
+        vendor = st.text_input("Supplier", receipt["vendor_name"] or "")
         receipt_date = st.text_input(
-            "Date (YYYY-MM-DD)",
+            "Date (YYYY-MM-DD, e.g. 2026-06-14)",
             receipt["receipt_date"].isoformat() if receipt["receipt_date"] else "",
-            help=f"Read from receipt: {receipt['receipt_date_raw'] or 'nothing'}",
+            help=f"What the computer read: {receipt['receipt_date_raw'] or 'nothing'}",
         )
         number = st.text_input("Receipt number", receipt["receipt_number"] or "")
         col1, col2, col3 = st.columns(3)
@@ -73,7 +81,8 @@ with fields_col:
         tax = col2.text_input("Tax", review.as_text(receipt["tax"]))
         total = col3.text_input("Total", review.as_text(receipt["total"]))
 
-        st.write("Line items (add or delete rows if OCR missed or invented a line)")
+        st.write("**Items on the receipt.** Fix anything that doesn't match the photo. "
+                 "Add a row if an item is missing; delete a row that isn't on the receipt.")
         lines_df = pd.DataFrame(
             [{field: review.as_text(line.get(field)) for field in review.LINE_FIELDS}
              | {"line_no": line["line_no"]} for line in data["lines"]],
@@ -87,10 +96,10 @@ with fields_col:
             disabled=["line_no"],
             column_config={
                 "line_no": st.column_config.NumberColumn("#", width="small"),
-                "description": "Description",
+                "description": "Item",
                 "quantity": "Qty",
                 "unit_raw": "Unit",
-                "unit_price": "Unit price",
+                "unit_price": "Price",
                 "line_total": "Amount",
             },
         )
@@ -121,19 +130,20 @@ with fields_col:
             review.set_review_status(conn, receipt_id, "rejected")
             load_mart.build_mart(conn)   # keep analytics in sync with approvals
             st.rerun()
-        if failed:
-            st.caption("Some checks failed. Fix the values above, or approve anyway if the receipt itself is wrong.")
+        st.caption("Save your changes first, then approve. Reject a photo that isn't a receipt "
+                   "or is a copy of one already saved.")
     else:
-        if reopen_col.button("↩️ Reopen for review", width="stretch"):
+        if reopen_col.button("↩️ Check again", width="stretch"):
             review.set_review_status(conn, receipt_id, "pending")
             load_mart.build_mart(conn)   # keep analytics in sync with approvals
             st.rerun()
 
-    with st.expander(f"Change history ({len(data['corrections'])})"):
-        if data["corrections"]:
-            st.dataframe(
-                pd.DataFrame(data["corrections"], columns=["when", "field", "old", "new"]),
-                hide_index=True, width="stretch",
-            )
-        else:
-            st.write("No changes yet.")
+    if developer:
+        with st.expander(f"Change history ({len(data['corrections'])})"):
+            if data["corrections"]:
+                st.dataframe(
+                    pd.DataFrame(data["corrections"], columns=["when", "field", "old", "new"]),
+                    hide_index=True, width="stretch",
+                )
+            else:
+                st.write("No changes yet.")

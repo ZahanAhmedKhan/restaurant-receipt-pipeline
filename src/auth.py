@@ -1,8 +1,15 @@
-"""App password hashing (one shared password for the local Streamlit app).
+"""App passwords for the local Streamlit app.
 
-We store only a salted hash in .env, never the password itself.
+Two passwords, two views (not user accounts):
+    staff password     -> simple menu: add, check, Excel, ask a question
+    developer password -> everything, including analytics and setup pages
+
+We store only salted hashes in .env, never the passwords themselves.
 Format: pbkdf2_sha256$<iterations>$<salt hex>$<hash hex>
 """
+
+STAFF = "staff"
+DEVELOPER = "developer"
 
 import hashlib
 import hmac
@@ -31,3 +38,12 @@ def verify_password(password, stored_hash):
         return False
     # compare_digest takes the same time whether or not the start matches
     return hmac.compare_digest(candidate, stored_hash)
+
+
+def role_for_password(password, staff_hash, developer_hash):
+    """Which view this password opens: DEVELOPER, STAFF, or None (wrong password)."""
+    if verify_password(password, developer_hash):
+        return DEVELOPER
+    if verify_password(password, staff_hash):
+        return STAFF
+    return None

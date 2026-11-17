@@ -51,7 +51,7 @@ def test_estimated_savings_hand_calculation(db_conn):
 def test_suppliers_page_says_estimated(db_conn):
     build(db_conn)
     app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "7_Suppliers.py"))
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     app.run()
     assert not app.exception
     assert "Estimated savings only" in app.warning[0].value

@@ -70,7 +70,7 @@ More detail: [docs/architecture.md](docs/architecture.md) and
 | OCR | Tesseract (`pytesseract`); Gemini optional (`google-genai`) |
 | App | Streamlit (multipage), password-protected |
 | SQL safety for the chatbot | `sqlglot` + read-only PostgreSQL role |
-| Tests | pytest (351 tests) |
+| Tests | pytest (357 tests) |
 | Scheduling | Windows Task Scheduler |
 
 ## Setup (Windows, PowerShell)
@@ -137,7 +137,8 @@ problems: 3 wrong totals, 1 subtotal that doesn't match its lines, 1 re-photogra
 ```powershell
 python -m src.run_pipeline --sample        # ingest -> OCR -> parse -> clean -> checks -> mart
 python scripts\demo_review_samples.py      # DEMO ONLY: plays the reviewer for the sample receipts
-python scripts\set_app_password.py         # choose the app password (stored only as a hash)
+python scripts\set_app_password.py         # staff password (stored only as a hash)
+python scripts\set_app_password.py --developer   # developer password (must be different)
 streamlit run app\Home.py                  # http://localhost:8501
 ```
 
@@ -158,8 +159,14 @@ take the photos top to bottom and press **Add as photo N** after each; with uplo
 in order. Avoid overlapping photos: a line that appears twice is counted twice (the quality checks
 will flag the receipt if the lines no longer add up).
 
-App pages: **Home** (overview) · **Add Receipt** (camera or upload) · **Review** · **Export** ·
-**Items** (mapping rules) · **Spending** · **Prices** · **Suppliers** · **OCR Evaluation** · **Chatbot**.
+**Two passwords, two menus** (not user accounts; whichever password is typed decides the menu):
+
+| Login | Menu |
+|---|---|
+| Staff password | Start · Add receipt · Check receipts · Excel · Ask a question (plain wording, no technical details) |
+| Developer password | the same, plus **Analytics** (Overview, Spending, Prices, Suppliers) and **Setup and quality** (Item rules, OCR evaluation), check names, change history and the chatbot's SQL |
+
+Developer-only pages refuse a staff login even if the address is typed in directly.
 
 ## Run automatically every 30 minutes (Windows Task Scheduler)
 
@@ -284,7 +291,7 @@ messier, so real-world accuracy will be lower.
 | Suppliers compared | 5 items across 4 suppliers | `mart.v_supplier_savings` |
 | Estimated monthly savings | $57.33 (**estimate**: ignores delivery fees, minimums, quality, availability) | `mart.v_supplier_savings` |
 | Chatbot accuracy | not measured yet (needs an API key); safety: 21 of 21 unsafe test queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
-| Automated tests | 351 passing | `python -m pytest` |
+| Automated tests | 357 passing | `python -m pytest` |
 
 Full OCR report: [docs/ocr_evaluation.md](docs/ocr_evaluation.md).
 

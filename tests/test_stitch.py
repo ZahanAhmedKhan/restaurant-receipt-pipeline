@@ -120,7 +120,7 @@ def test_bad_part_rejects_the_receipt(db_conn, tmp_path):
 
 def test_add_receipt_page_offers_long_receipt_mode(db_conn):
     app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "1_Add_Receipt.py"))
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     app.run()
     assert not app.exception
     assert "Several photos = one long receipt" in app.radio[0].options

@@ -2,7 +2,7 @@
 
 import app_common
 
-app_common.setup_page("Items", layout="wide")
+app_common.setup_page("Items", layout="wide", developer_only=True)
 
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402

@@ -99,7 +99,8 @@ Lineage from any number on a dashboard back to the photo:
 - **Tesseract default, Gemini optional.** Free and private by default; Gemini is compared on fake data.
 - **Read-only role for the chatbot.** AI-written SQL is untrusted: it is parsed and checked with
   `sqlglot`, then run by a role that physically cannot change data, with a timeout and a row limit.
-- **Local only.** One shared app password. Real user accounts would be needed before going online.
+- **Local only.** Two app passwords (staff and developer) choose a simple or a full menu; they are
+  not user accounts. Real user accounts would be needed before going online.
 
 ## Security summary
 

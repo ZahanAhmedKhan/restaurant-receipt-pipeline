@@ -2,7 +2,7 @@
 
 import app_common
 
-app_common.setup_page("Suppliers", layout="wide")
+app_common.setup_page("Suppliers", layout="wide", developer_only=True)
 
 import streamlit as st  # noqa: E402
 

@@ -63,6 +63,45 @@ def convert(field, value):
 
 
 # ---------------------------------------------------------------------------
+# Plain-English problem messages (for staff)
+# ---------------------------------------------------------------------------
+PROBLEM_TITLES = {
+    "required_fields": "Some information is missing",
+    "valid_date": "Check the date",
+    "no_negative_values": "There is a negative amount",
+    "lines_match_subtotal": "The items don't add up to the subtotal",
+    "total_is_subtotal_plus_tax": "Subtotal + tax doesn't match the total",
+    "not_duplicate": "This receipt may already be saved",
+}
+
+# Technical words in check details -> everyday words
+PLAIN_WORDS = [
+    ("missing: ", ""),
+    ("vendor_name", "supplier"),
+    ("receipt_date", "date"),
+    ("receipt_number", "receipt number"),
+    ("values on line(s)", "something on item line(s)"),
+    ("line items", "the items"),
+    ("lines add up to", "items add up to"),
+    ("some line amounts could not be read", "some item amounts could not be read"),
+    ("line_total", "amount"),
+    ("unit_price", "price"),
+]
+
+
+def friendly_problem(check_name, details):
+    """One plain sentence for a failed check, e.g. for check_name='not_duplicate',
+    details='same as receipt #11' -> 'This receipt may already be saved (same as receipt #11).'"""
+    title = PROBLEM_TITLES.get(check_name, check_name.replace("_", " ").capitalize())
+    if not details:
+        return f"{title}."
+    text = details
+    for technical, plain in PLAIN_WORDS:
+        text = text.replace(technical, plain)
+    return f"{title} ({text})."
+
+
+# ---------------------------------------------------------------------------
 # Reading
 # ---------------------------------------------------------------------------
 def list_receipts(conn, status):

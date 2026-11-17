@@ -45,7 +45,8 @@ GEMINI_MODEL = _get("GEMINI_MODEL", "gemini-3.8-flash")
 ALLOW_EXTERNAL_AI_ON_PRIVATE = _get("ALLOW_EXTERNAL_AI_ON_PRIVATE", "false").lower() == "true"
 
 # --- Streamlit app ---
-APP_PASSWORD_HASH = _get("APP_PASSWORD_HASH")
+APP_PASSWORD_HASH = _get("APP_PASSWORD_HASH")              # staff password
+DEVELOPER_PASSWORD_HASH = _get("DEVELOPER_PASSWORD_HASH")  # developer password
 
 # --- Price alerts ---
 PRICE_ALERT_THRESHOLD_PCT = float(_get("PRICE_ALERT_THRESHOLD_PCT", "10"))

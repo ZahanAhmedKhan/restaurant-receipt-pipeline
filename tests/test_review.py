@@ -118,6 +118,28 @@ def test_reopen_reruns_checks(db_conn):
     assert status == "needs_review"
 
 
+def test_friendly_problem_messages():
+    assert review.friendly_problem("not_duplicate", "same as receipt #11") == \
+        "This receipt may already be saved (same as receipt #11)."
+    assert review.friendly_problem("required_fields", "missing: vendor_name; values on line(s) 2") == \
+        "Some information is missing (supplier; something on item line(s) 2)."
+    assert review.friendly_problem("lines_match_subtotal", "lines add up to 470.00, subtotal is 476.90") == \
+        "The items don't add up to the subtotal (items add up to 470.00, subtotal is 476.90)."
+    assert review.friendly_problem("valid_date", None) == "Check the date."
+
+
+def test_staff_sees_plain_words_on_review_page(db_conn):
+    receipt_id = insert_receipt(db_conn, 1, total="99.00")
+    from src import quality
+    quality.run_checks(db_conn, receipt_id)
+    app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "2_Review.py"))
+    app.session_state["role"] = "staff"
+    app.run()
+    assert not app.exception
+    assert any("Subtotal + tax doesn't match the total" in e.value for e in app.error)
+    assert len(app.expander) == 0                                 # no change history for staff
+
+
 def test_review_page_shows_receipt_after_login(monkeypatch, db_conn, tmp_path):
     receipt_id = insert_receipt(db_conn, 1, total="99.00")
     from src import quality
@@ -125,7 +147,7 @@ def test_review_page_shows_receipt_after_login(monkeypatch, db_conn, tmp_path):
 
     monkeypatch.setattr(config, "APP_PASSWORD_HASH", auth.hash_password("letmein!", iterations=1000))
     app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "2_Review.py"))
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     app.run()
     assert not app.exception
     assert any("total is 99.00" in e.value for e in app.error)   # failed check shown

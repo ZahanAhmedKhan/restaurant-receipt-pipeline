@@ -141,6 +141,14 @@
 - **Gemini model:** `gemini-2.5-flash` is no longer available to new API keys; default is now
   `gemini-3.8-flash` (set `GEMINI_MODEL` in `.env` to change it).
 
+- **Extra (requested): simple staff view + developer view.** Two passwords instead of one
+  (`APP_PASSWORD_HASH` = staff, `DEVELOPER_PASSWORD_HASH` = developer; set with
+  `scripts/set_app_password.py [--developer]`). `app/Home.py` logs in and builds the menu with
+  `st.navigation`: staff get Start, Add receipt, Check receipts, Excel, Ask a question; the developer also
+  gets Analytics and Setup pages. Staff see plain-English problems (`review.friendly_problem()`), no change
+  history and no SQL. Developer-only pages refuse a staff login. Note: CLAUDE.md says "no user-role
+  systems"; this was added at the owner's request and kept to two passwords (no accounts).
+
 ## Next
 
 All milestones are built. Remaining items need you (see Open issues): add a Gemini key and run the two

@@ -57,7 +57,7 @@ def test_export_to_file_name(db_conn, tmp_path):
 def test_export_page_has_download_button(db_conn):
     approve(db_conn, insert_receipt(db_conn, 1))
     app = AppTest.from_file(str(config.PROJECT_ROOT / "app" / "pages" / "3_Export.py"))
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     app.run()
     assert not app.exception
     assert app.metric[0].value == "1"

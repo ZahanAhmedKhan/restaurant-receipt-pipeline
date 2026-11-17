@@ -2,8 +2,12 @@
 
 Each page starts with:
     import app_common
-    app_common.setup_page("Page title")
-which sets the layout and asks for the app password.
+    app_common.setup_page("Page title")                        # staff + developer
+    app_common.setup_page("Page title", developer_only=True)   # developer only
+which sets the layout and asks for a password if nobody is logged in.
+
+Two passwords, two views (see src/auth.py): the role is kept in
+st.session_state["role"] ("staff" or "developer").
 """
 
 import sys
@@ -17,39 +21,61 @@ if str(PROJECT_ROOT) not in sys.path:
 import streamlit as st  # noqa: E402
 
 from src import config  # noqa: E402
-from src.auth import verify_password  # noqa: E402
+from src.auth import DEVELOPER, STAFF, role_for_password  # noqa: E402
 from src.db import get_connection  # noqa: E402
 
 
-def setup_page(title, layout="centered"):
-    """Page settings + password gate. Stops the page if not logged in.
+def setup_page(title, layout="centered", developer_only=False):
+    """Page settings + password gate. Stops the page if not allowed.
 
-    "centered" works best on phones; the review page uses "wide".
+    "centered" works best on phones; wide pages are for the developer views.
     """
     st.set_page_config(page_title=title, page_icon="🧾", layout=layout)
-    require_password()
+    require_login()
+    if developer_only and not is_developer():
+        st.error("This page is only for the developer account.")
+        st.stop()
 
 
-def require_password():
-    if st.session_state.get("authenticated"):
+def current_role():
+    return st.session_state.get("role")
+
+
+def is_developer():
+    return current_role() == DEVELOPER
+
+
+def require_login():
+    if current_role() in (STAFF, DEVELOPER):
         return
 
-    if not config.APP_PASSWORD_HASH:
+    if not config.APP_PASSWORD_HASH and not config.DEVELOPER_PASSWORD_HASH:
         st.error("No app password is set. In a terminal run: "
                  "`python scripts\\set_app_password.py`, then restart the app.")
         st.stop()
 
     st.title("🧾 Receipts")
     with st.form("login"):
-        password = st.text_input("App password", type="password")
+        password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Log in")
     if submitted:
-        if verify_password(password, config.APP_PASSWORD_HASH):
-            st.session_state["authenticated"] = True
+        role = role_for_password(password, config.APP_PASSWORD_HASH,
+                                 config.DEVELOPER_PASSWORD_HASH)
+        if role:
+            st.session_state["role"] = role
             st.rerun()
         else:
             st.error("Wrong password.")
     st.stop()
+
+
+def logout_button():
+    """A small 'Log out' button in the sidebar."""
+    label = "Developer" if is_developer() else "Staff"
+    st.sidebar.caption(f"Logged in: {label}")
+    if st.sidebar.button("Log out"):
+        st.session_state.clear()
+        st.rerun()
 
 
 @st.cache_resource

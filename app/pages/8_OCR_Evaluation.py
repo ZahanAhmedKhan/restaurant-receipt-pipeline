@@ -2,7 +2,7 @@
 
 import app_common
 
-app_common.setup_page("OCR Evaluation")
+app_common.setup_page("OCR Evaluation", developer_only=True)
 
 import streamlit as st  # noqa: E402
 

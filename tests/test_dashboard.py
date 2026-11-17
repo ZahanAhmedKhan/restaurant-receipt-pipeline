@@ -63,7 +63,7 @@ def test_ocr_results_table(tmp_path):
 
 def run_page(path):
     app = AppTest.from_file(str(path), default_timeout=30)
-    app.session_state["authenticated"] = True
+    app.session_state["role"] = "developer"
     return app.run()
 
 
@@ -73,8 +73,8 @@ def test_dashboard_pages_render(data, page):
     assert not app.exception
 
 
-def test_home_overview_renders(data):
-    app = run_page(config.PROJECT_ROOT / "app" / "Home.py")
+def test_overview_renders(data):
+    app = run_page(PAGES / "0_Overview.py")
     assert not app.exception
     assert app.metric[0].value == "$158.50"
 

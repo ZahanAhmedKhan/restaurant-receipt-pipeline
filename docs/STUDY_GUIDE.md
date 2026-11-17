@@ -235,7 +235,9 @@ on Submit, the image goes through ingestion → OCR → parse → clean → chec
 every page, `st.stop()` if not logged in), `auth.hash_password()` (salted PBKDF2, 600k iterations),
 `auth.verify_password()` (`hmac.compare_digest`), `show_result()` messages.
 
-**Why.** One shared password is enough for a local family app (no user-role system needed now).
+**Why.** Two passwords (staff and developer) are enough for a local family app: the password picks
+a simple or a full menu (`Home.py` builds it with `st.navigation`; developer-only pages also check
+`setup_page(..., developer_only=True)`). No user accounts needed while it stays local.
 The password is stored only as a slow, salted hash. Images are shown by reading bytes and passing
 them to `st.image`; static serving is off. Phone cameras need HTTPS, so Tailscale gives a private
 HTTPS address without exposing the app to the internet.

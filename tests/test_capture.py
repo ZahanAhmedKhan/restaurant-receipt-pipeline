@@ -1,5 +1,6 @@
 """Tests for the capture flow, the app password and the Streamlit pages."""
 
+import pytest
 from streamlit.testing.v1 import AppTest
 
 from scripts.set_app_password import update_env_value
@@ -72,28 +73,67 @@ def test_rejected_file_reports_reason(db_conn, tmp_path):
 
 
 # --- Streamlit pages (password gate) --------------------------------------------
+STAFF_HASH = auth.hash_password("staff-pass", iterations=1000)
+DEV_HASH = auth.hash_password("developer-pass", iterations=1000)
+
+
+@pytest.fixture
+def two_passwords(monkeypatch):
+    monkeypatch.setattr(config, "APP_PASSWORD_HASH", STAFF_HASH)
+    monkeypatch.setattr(config, "DEVELOPER_PASSWORD_HASH", DEV_HASH)
+
+
+def test_role_for_password():
+    assert auth.role_for_password("staff-pass", STAFF_HASH, DEV_HASH) == auth.STAFF
+    assert auth.role_for_password("developer-pass", STAFF_HASH, DEV_HASH) == auth.DEVELOPER
+    assert auth.role_for_password("nope", STAFF_HASH, DEV_HASH) is None
+    assert auth.role_for_password("staff-pass", STAFF_HASH, None) == auth.STAFF
+
+
 def test_home_without_password_hash_shows_setup_message(monkeypatch):
     monkeypatch.setattr(config, "APP_PASSWORD_HASH", None)
+    monkeypatch.setattr(config, "DEVELOPER_PASSWORD_HASH", None)
     app = AppTest.from_file(str(APP_DIR / "Home.py")).run()
     assert "set_app_password" in app.error[0].value
 
 
-def test_home_asks_for_password_and_accepts_correct_one(monkeypatch, db_conn):
-    monkeypatch.setattr(config, "APP_PASSWORD_HASH", auth.hash_password("letmein!", iterations=1000))
-    app = AppTest.from_file(str(APP_DIR / "Home.py")).run()
-    assert len(app.metric) == 0                    # nothing shown before login
-
-    app.text_input[0].input("wrong-password")
+def login(password):
+    app = AppTest.from_file(str(APP_DIR / "Home.py"), default_timeout=30).run()
+    app.text_input[0].input(password)
     app.button[0].click().run()
+    return app
+
+
+def test_wrong_password_is_refused(two_passwords):
+    app = login("wrong-password")
     assert app.error[0].value == "Wrong password."
-
-    app.text_input[0].input("letmein!")
-    app.button[0].click().run()
-    assert len(app.metric) == 7                    # overview numbers visible after login
+    assert "role" not in app.session_state
 
 
-def test_add_receipt_page_is_protected(monkeypatch):
-    monkeypatch.setattr(config, "APP_PASSWORD_HASH", auth.hash_password("letmein!", iterations=1000))
+def test_staff_login_opens_simple_start_page(two_passwords, db_conn):
+    app = login("staff-pass")
+    assert not app.exception
+    assert app.session_state["role"] == "staff"
+    assert app.title[0].value == "🧾 Receipts"                    # the Start page
+    assert "Logged in: Staff" in [c.value for c in app.sidebar.caption]
+
+
+def test_developer_login(two_passwords, db_conn):
+    app = login("developer-pass")
+    assert not app.exception
+    assert app.session_state["role"] == "developer"
+
+
+def test_staff_cannot_open_developer_pages(db_conn):
+    for page in ["0_Overview.py", "4_Items.py", "5_Spending.py", "6_Prices.py",
+                 "7_Suppliers.py", "8_OCR_Evaluation.py"]:
+        app = AppTest.from_file(str(APP_DIR / "pages" / page))
+        app.session_state["role"] = "staff"
+        app.run()
+        assert app.error[0].value == "This page is only for the developer account.", page
+
+
+def test_add_receipt_page_is_protected(two_passwords):
     app = AppTest.from_file(str(APP_DIR / "pages" / "1_Add_Receipt.py")).run()
     assert len(app.tabs) == 0                      # capture tabs hidden until login
-    assert app.text_input[0].label == "App password"
+    assert app.text_input[0].label == "Password"

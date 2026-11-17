@@ -2,7 +2,7 @@
 
 import app_common
 
-app_common.setup_page("Prices", layout="wide")
+app_common.setup_page("Prices", layout="wide", developer_only=True)
 
 import charts  # noqa: E402
 import streamlit as st  # noqa: E402
