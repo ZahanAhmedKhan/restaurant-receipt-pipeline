@@ -129,9 +129,13 @@
   placeholder for time saved), `docs/architecture.md`, `docs/database_schema.md`. Removed the personal
   Windows path from the README (generic `<project folder>` instead).
 
+- **M8.3 Study guide:** `docs/STUDY_GUIDE.md`: 18 sections in data-flow order (what, files, key code,
+  why, analogy), interview questions per section, answers at the bottom.
+
 ## Next
 
-- **M8.3 Study guide:** `docs/STUDY_GUIDE.md`.
+All milestones are built. Remaining items need you (see Open issues): add a Gemini key and run the two
+evaluations, add screenshots, measure manual-entry time saved with the family, then try real receipts.
 
 ## Open issues
 
