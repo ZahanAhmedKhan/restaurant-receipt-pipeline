@@ -5,6 +5,7 @@ that is already done.
     2. OCR      files with status 'new'      -> raw.ocr_run
     3. clean    files with status 'ocr_done' -> clean.receipt / clean.receipt_line
     4. quality  checks on the new receipts   -> dq.check_result, review_status
+    5. mart     rebuild the star schema from approved receipts
 
 Usage:
     python -m src.run_pipeline              # process whatever is in data/inbox/
@@ -15,7 +16,7 @@ import argparse
 import logging
 import shutil
 
-from src import clean, config, ingest, ocr, quality
+from src import clean, config, ingest, load_mart, ocr, quality
 from src.db import get_connection
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,7 @@ def run(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None):
             results = quality.run_checks(conn, receipt_id)
             if not all(passed for passed, _ in results.values()):
                 needs_review += 1
+        mart_counts = load_mart.build_mart(conn)
         summary = {
             "ingested_new": ingest_counts["new"],
             "duplicates": ingest_counts["duplicate"],
@@ -59,6 +61,7 @@ def run(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None):
             "ocr_runs": ocr_count,
             "receipts_loaded": len(receipt_ids),
             "needs_review": needs_review,
+            "mart_fact_rows": mart_counts["fact_purchase_line"],
         }
         logger.info("Pipeline summary: %s", summary)
         return summary

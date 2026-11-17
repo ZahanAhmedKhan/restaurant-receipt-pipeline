@@ -9,7 +9,7 @@ app_common.setup_page("Review", layout="wide")
 import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
-from src import review  # noqa: E402
+from src import load_mart, review  # noqa: E402
 from src.ocr import resolve_stored_path  # noqa: E402
 
 STATUS_LABELS = {
@@ -105,6 +105,8 @@ with fields_col:
         new_header = {"vendor_name": vendor, "receipt_date": receipt_date, "receipt_number": number,
                       "subtotal": subtotal, "tax": tax, "total": total}
         changes = review.save_corrections(conn, receipt_id, new_header, new_lines)
+        if receipt["review_status"] == "approved":
+            load_mart.build_mart(conn)   # an approved receipt changed: update analytics
         st.toast(f"Saved {changes} change(s)")
         st.rerun()
 
@@ -113,15 +115,18 @@ with fields_col:
     if receipt["review_status"] in ("pending", "needs_review"):
         if approve_col.button("✅ Approve", type="primary", width="stretch"):
             review.set_review_status(conn, receipt_id, "approved")
+            load_mart.build_mart(conn)   # keep analytics in sync with approvals
             st.rerun()
         if reject_col.button("❌ Reject", width="stretch"):
             review.set_review_status(conn, receipt_id, "rejected")
+            load_mart.build_mart(conn)   # keep analytics in sync with approvals
             st.rerun()
         if failed:
             st.caption("Some checks failed. Fix the values above, or approve anyway if the receipt itself is wrong.")
     else:
         if reopen_col.button("↩️ Reopen for review", width="stretch"):
             review.set_review_status(conn, receipt_id, "pending")
+            load_mart.build_mart(conn)   # keep analytics in sync with approvals
             st.rerun()
 
     with st.expander(f"Change history ({len(data['corrections'])})"):

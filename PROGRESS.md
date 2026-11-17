@@ -64,9 +64,15 @@
   `app/pages/3_Export.py` download button, `python -m src.export_excel` writes `exports/receipts_<date>.xlsx`.
   **MVP done:** photo in (camera, upload or folder) -> reviewed data out to Excel.
 
+- **M4.1 Star schema:** `sql/004_mart.sql` (`dim_vendor`, `dim_item` with an `UNMAPPED` row, `dim_date`
+  with an unknown-date row 0, `fact_purchase_line` at one row per approved line, `line_id` UNIQUE for
+  lineage), `src/load_mart.py` (upserts dims, rebuilds facts with delete + insert in one transaction),
+  5 example queries in `sql/queries/`. The mart rebuild runs at the end of `run_pipeline.py` and after
+  approve/reject/reopen on the Review page. Tests: same counts on rerun, fact total = approved line total.
+
 ## Next
 
-- **M4.1 Star schema:** `sql/004_mart.sql`, `src/load_mart.py`, `sql/queries/`.
+- **M5.1 OCR evaluation:** `src/evaluate_ocr.py`, `docs/ocr_evaluation.md`.
 
 ## Open issues
 
@@ -163,3 +169,12 @@
 - `pandas.ExcelWriter` with openpyxl; number formats and column widths
 - `groupby` + `unstack` (pivot) for a summary table
 - In-memory files (`io.BytesIO`) and `st.download_button`
+
+### M4.1
+- Star schema: facts vs. dimensions, grain, surrogate keys
+- Date dimension (`generate_series`, `to_char`, `extract`)
+- "Unknown" members in dimensions
+- Full rebuild (delete + insert) vs. incremental load; idempotency
+- Reconciliation tests
+- Window functions (`sum() OVER ()`, `lag()`), CTEs (`WITH`)
+- Data lineage
