@@ -175,6 +175,24 @@ def process_single_image(conn, data, original_name, source, raw_dir=None):
     return result
 
 
+def process_multi_image(conn, parts, source, raw_dir=None):
+    """One long receipt photographed in several parts (top first).
+
+    parts: list of (bytes, original_name). The photos are joined into one
+    image and then processed exactly like a single photo.
+    Returns the same dict as process_single_image().
+    """
+    from src.stitch import StitchError, stitch_images
+
+    try:
+        joined = stitch_images(parts)
+    except StitchError as reason:
+        return {"status": "rejected", "file_id": None, "receipt_id": None,
+                "reason": str(reason), "needs_review": False}
+    name = f"long_receipt_{len(parts)}_photos.jpg"
+    return process_single_image(conn, joined, name, source, raw_dir=raw_dir)
+
+
 def main(argv=None, lock=None):
     """Command-line entry point. Returns the exit code."""
     parser = argparse.ArgumentParser(description="Run the receipt pipeline.")

@@ -132,6 +132,15 @@
 - **M8.3 Study guide:** `docs/STUDY_GUIDE.md`: 18 sections in data-flow order (what, files, key code,
   why, analogy), interview questions per section, answers at the bottom.
 
+- **Extra (requested): long receipts in several photos.** `src/stitch.py` joins 2–10 photos top to bottom
+  (each part validated first, EXIF rotation applied, same width capped at 2000 px, kept under 50 MP and
+  10 MB) and the result goes through `ingest_image_bytes` like any photo (`process_multi_image()` in
+  `run_pipeline.py`). Add Receipt page: "One photo = one receipt" / "Several photos = one long receipt" in
+  both tabs. Only the joined image is stored, not the separate photos. Overlapping photos repeat lines;
+  the lines-vs-subtotal check flags that.
+- **Gemini model:** `gemini-2.5-flash` is no longer available to new API keys; default is now
+  `gemini-3.8-flash` (set `GEMINI_MODEL` in `.env` to change it).
+
 ## Next
 
 All milestones are built. Remaining items need you (see Open issues): add a Gemini key and run the two
@@ -311,3 +320,9 @@ evaluations, add screenshots, measure manual-entry time saved with the family, t
 - Documenting a data project: problem, architecture, setup, results
 - Mermaid diagrams (flowchart, ER diagram)
 - Reporting measured results honestly (and saying what is not measured)
+
+### Extra: long receipts
+- Image stitching with Pillow (resize to a common width, paste onto one canvas)
+- EXIF orientation (`ImageOps.exif_transpose`)
+- Streamlit `session_state` to collect several camera photos
+- Reusing one intake function for a new input type

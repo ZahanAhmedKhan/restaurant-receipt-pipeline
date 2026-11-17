@@ -16,6 +16,8 @@ are going up or which supplier is cheaper.
 ## What it does
 
 - **Capture:** drop photos in `data/inbox/`, or use the app's camera / upload page (works on a phone).
+  A long receipt can be taken as **several photos**; they are joined top to bottom and read as one
+  receipt (like a document scanner app).
 - **No duplicates:** every image is identified by its SHA-256 hash; the same photo is never stored twice.
 - **Keeps originals:** images are stored unchanged under their hash, for audit.
 - **Reads receipts:** Tesseract OCR (free, offline) by default; Gemini as an optional comparison.
@@ -68,7 +70,7 @@ More detail: [docs/architecture.md](docs/architecture.md) and
 | OCR | Tesseract (`pytesseract`); Gemini optional (`google-genai`) |
 | App | Streamlit (multipage), password-protected |
 | SQL safety for the chatbot | `sqlglot` + read-only PostgreSQL role |
-| Tests | pytest (339 tests) |
+| Tests | pytest (351 tests) |
 | Scheduling | Windows Task Scheduler |
 
 ## Setup (Windows, PowerShell)
@@ -150,6 +152,11 @@ python -m src.run_pipeline       # process new photos in data\inbox\ (or let Tas
 streamlit run app\Home.py        # review, export, dashboards
 python -m src.export_excel       # Excel file of approved receipts in exports\
 ```
+
+**Long receipts:** on **Add Receipt**, choose "Several photos = one long receipt". With the camera,
+take the photos top to bottom and press **Add as photo N** after each; with upload, select the photos
+in order. Avoid overlapping photos: a line that appears twice is counted twice (the quality checks
+will flag the receipt if the lines no longer add up).
 
 App pages: **Home** (overview) · **Add Receipt** (camera or upload) · **Review** · **Export** ·
 **Items** (mapping rules) · **Spending** · **Prices** · **Suppliers** · **OCR Evaluation** · **Chatbot**.
@@ -277,7 +284,7 @@ messier, so real-world accuracy will be lower.
 | Suppliers compared | 5 items across 4 suppliers | `mart.v_supplier_savings` |
 | Estimated monthly savings | $57.33 (**estimate**: ignores delivery fees, minimums, quality, availability) | `mart.v_supplier_savings` |
 | Chatbot accuracy | not measured yet (needs an API key); safety: 21 of 21 unsafe test queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
-| Automated tests | 339 passing | `python -m pytest` |
+| Automated tests | 351 passing | `python -m pytest` |
 
 Full OCR report: [docs/ocr_evaluation.md](docs/ocr_evaluation.md).
 
