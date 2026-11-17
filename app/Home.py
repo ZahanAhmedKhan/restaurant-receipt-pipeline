@@ -14,7 +14,8 @@ st.title("🧾 Restaurant Receipts")
 st.write("Use the menu on the left:")
 st.markdown(
     "- **Add Receipt**: take a photo or upload receipt images\n"
-    "- **Review**: check what was read, fix mistakes, approve or reject"
+    "- **Review**: check what was read, fix mistakes, approve or reject\n"
+    "- **Export**: download approved receipts as an Excel file"
 )
 
 # Small status overview: how many receipts are in each review state

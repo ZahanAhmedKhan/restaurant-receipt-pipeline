@@ -59,9 +59,14 @@
   (`save_corrections()` logs every changed field in `clean.correction` and reruns quality checks;
   `set_review_status()` logs status changes). Values are compared by value, so `2` and `2.000` are equal.
 
+- **M3.4 Excel export:** `src/export_excel.py` (approved receipts only; sheets Receipts, Lines, Summary
+  = spend by vendor x month with totals; money kept as Decimal, money number format, frozen headers),
+  `app/pages/3_Export.py` download button, `python -m src.export_excel` writes `exports/receipts_<date>.xlsx`.
+  **MVP done:** photo in (camera, upload or folder) -> reviewed data out to Excel.
+
 ## Next
 
-- **M3.4 Excel export:** `src/export_excel.py` + download button.
+- **M4.1 Star schema:** `sql/004_mart.sql`, `src/load_mart.py`, `sql/queries/`.
 
 ## Open issues
 
@@ -153,3 +158,8 @@
 - `st.data_editor` and `st.form`
 - Comparing values by type (Decimal equality) vs. by text
 - Re-validating data after edits
+
+### M3.4
+- `pandas.ExcelWriter` with openpyxl; number formats and column widths
+- `groupby` + `unstack` (pivot) for a summary table
+- In-memory files (`io.BytesIO`) and `st.download_button`

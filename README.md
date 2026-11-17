@@ -75,7 +75,9 @@ python scripts\set_app_password.py    # one time: choose the app password (saved
 streamlit run app\Home.py             # opens http://localhost:8501
 ```
 
-Pages: **Add Receipt** (camera or upload), **Review**.
+Pages: **Add Receipt** (camera or upload), **Review**, **Export** (Excel download).
+
+Excel export from the terminal: `python -m src.export_excel` (writes `exports\receipts_<date>.xlsx`).
 
 ## Using on a phone
 
