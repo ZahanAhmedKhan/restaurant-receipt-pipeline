@@ -124,6 +124,19 @@ To use Gemini in the pipeline, also set `OCR_METHOD=gemini`. Gemini only ever re
 sample receipts (checked by file hash). Real receipts stay on Tesseract unless you set
 `ALLOW_EXTERNAL_AI_ON_PRIVATE=true`.
 
+## Chatbot (text-to-SQL, read-only)
+
+Needs `GEMINI_API_KEY` in `.env`. Use the **Chatbot** page, or the terminal:
+
+```powershell
+python -m src.chatbot "How much did we spend with each vendor?"
+python -m src.chatbot --evaluate     # score on the 25 questions in tests\chatbot_questions.json
+```
+
+Safety: Gemini only gets the mart table structure and the question. The SQL it returns must parse
+(with `sqlglot`) as a single SELECT on `mart.` objects, gets `LIMIT 200`, and runs as the
+`receipts_readonly` role in a read-only transaction with a 5-second timeout.
+
 ## The app (Streamlit)
 
 ```powershell

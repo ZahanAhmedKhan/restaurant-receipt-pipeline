@@ -117,9 +117,16 @@
   `8_OCR_Evaluation.py` (results from `docs/ocr_evaluation.json`). Queries in `src/dashboard.py`; Altair
   chart helpers in `app/charts.py` (fixed vendor colors, hover tooltips, a table view under every chart).
 
+- **M8.1 Text-to-SQL chatbot:** `src/chatbot.py` (schema description from the catalog, SQL prompt,
+  `sqlglot` validation: one SELECT, `mart.` objects only, no write/DDL/COPY/SET/GRANT/INTO, no `pg_*`-style
+  functions, `LIMIT 200`; runs as `receipts_readonly` in a read-only transaction with a 5 s timeout;
+  one-line answer only when all stored images are sample receipts or `ALLOW_EXTERNAL_AI_ON_PRIVATE=true`),
+  `app/pages/9_Chatbot.py`, `tests/chatbot_questions.json` (25 questions with hand-written SQL + 5 unsafe
+  requests), `python -m src.chatbot --evaluate`. Tests mock the API; 21 unsafe SQL strings are blocked.
+
 ## Next
 
-- **M8.1 Text-to-SQL chatbot:** `src/chatbot.py`, chatbot page, 25-question evaluation.
+- **M8.2 Polish:** README, `docs/architecture.md`, `docs/database_schema.md`.
 
 ## Open issues
 
@@ -128,6 +135,7 @@
   Spending and Prices charts look right.
 - **Gemini comparison not run yet:** no `GEMINI_API_KEY` in `.env`. Add a key and run
   `python -m src.evaluate_ocr --method gemini` to get measured Gemini numbers.
+- **Chatbot accuracy not measured yet** (same reason). With a key: `python -m src.chatbot --evaluate`.
 
 - Tesseract often misreads single-digit quantities (especially "1") and sometimes whole price columns on
   blurred images, so most sample receipts need review. To be compared with Gemini in M5.2.
@@ -280,3 +288,10 @@
 - Consistent categorical colors per entity; tooltips; table view for accessibility
 - Altair / Vega-Lite basics (mark, encode, scale)
 - Date-range filters and parameterized `BETWEEN` queries
+
+### M8.1
+- Text-to-SQL with an LLM; prompt = schema + question
+- Treating AI output as untrusted input; SQL parsing with `sqlglot` (AST walk)
+- Defense in depth: validator + read-only role + read-only transaction + timeout + row limit
+- SQL injection vs. prompt injection
+- Evaluating with expected answers (result comparison, not SQL text comparison)
