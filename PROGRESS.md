@@ -98,9 +98,17 @@
   build). `src/prices.py` reads them. Measured on the sample data: 228 price-history rows, 1 alert
   (chicken breast at Harbor Fresh Foods, +14.8% on 2026-09-18, the planted price jump).
 
+- **M6.3 Supplier comparison:** `sql/007_supplier_comparison.sql`: `mart.v_supplier_comparison` (per item
+  per supplier for items bought from 2+ suppliers: latest price, cheapest supplier, difference,
+  average monthly quantity, **estimated** monthly savings = avg monthly quantity x price difference) and
+  `mart.v_supplier_savings` (per item). `app/pages/7_Suppliers.py` with a clear "estimated only" warning
+  (ignores delivery fees, minimums, quality, availability).
+  Measured on the sample data: 5 items compared, estimated monthly savings $57.33 in total
+  (canola oil $32.37, yellow onions $12.79, chicken breast $9.23, ground beef $1.98, jasmine rice $0.96).
+
 ## Next
 
-- **M6.3 Supplier comparison:** comparison view + page.
+- **M7.1 Scheduled runs:** lock file, log file, failed files, Task Scheduler steps.
 
 ## Open issues
 
@@ -238,3 +246,9 @@
 - Weighted average price (sum of amounts / sum of quantities)
 - Percent change and threshold alerts
 - Config values shared with SQL through a settings table
+
+### M6.3
+- `DISTINCT ON` for "latest row per group"
+- Window functions `min() OVER`, `first_value()`, `count() OVER`
+- Stacked CTEs and `CROSS JOIN`
+- Estimates vs. measurements; stating assumptions

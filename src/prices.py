@@ -26,6 +26,17 @@ def price_alerts(conn):
     return _query(conn, "SELECT * FROM mart.v_price_alerts ORDER BY purchase_date DESC, pct_change DESC")
 
 
+def supplier_comparison(conn):
+    """One row per item per supplier (items bought from 2+ suppliers)."""
+    return _query(conn, "SELECT * FROM mart.v_supplier_comparison ORDER BY item_name, latest_price")
+
+
+def supplier_savings(conn):
+    """One row per item with the ESTIMATED monthly savings, biggest first."""
+    return _query(conn, "SELECT * FROM mart.v_supplier_savings "
+                        "ORDER BY estimated_monthly_savings DESC, item_name")
+
+
 def alert_threshold(conn):
     row = conn.execute(
         "SELECT value FROM mart.setting WHERE name = 'price_alert_threshold_pct'"
