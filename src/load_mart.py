@@ -10,6 +10,7 @@ Usage:
 
 import logging
 
+from src import normalize
 from src.db import get_connection
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ ON CONFLICT (date_key) DO NOTHING
 """
 
 # 3. Rebuild the facts: one row per line on an approved receipt.
-#    Items are UNMAPPED until item normalization exists.
+#    Items start as UNMAPPED; step 4 (normalize.py) fills in the real item.
 DELETE_FACTS = "DELETE FROM mart.fact_purchase_line"
 
 INSERT_FACTS = """
@@ -87,6 +88,8 @@ def build_mart(conn=None):
             conn.execute(UPSERT_DATES)
             conn.execute(DELETE_FACTS)
             conn.execute(INSERT_FACTS, (UNKNOWN_DATE_KEY, UNKNOWN_VENDOR))
+            # 4. Map descriptions to items and convert to standard units
+            normalize.normalize_facts(conn)
         counts = {}
         for table in ("dim_vendor", "dim_item", "dim_date", "fact_purchase_line"):
             # table names come from the fixed tuple above, not from input

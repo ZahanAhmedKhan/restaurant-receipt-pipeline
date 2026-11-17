@@ -82,9 +82,19 @@
   `ALLOW_EXTERNAL_AI_ON_PRIVATE=true`; other files fall back to Tesseract. `clean.py` uses the stored JSON
   directly. `evaluate_ocr.py --method gemini` adds a Gemini column to the report. Tests mock the API.
 
+- **M6.1 Item normalization:** `sql/005_item_mapping.sql` (`mart.item_mapping` rules with ILIKE-style
+  patterns, seeded for the sample items), `src/normalize.py` (longest matching pattern wins; pack size
+  parsed from the description or set on the rule; lb/kg/oz -> lb, CT/EA/DZ -> each, GAL/L -> L;
+  fills `dim_item`, `standard_quantity`, `unit_price_standard` during the mart build), `app/pages/4_Items.py`
+  (unmapped descriptions, add a rule, current rules).
+  Also `scripts/demo_review_samples.py` (demo only): reviews the fake sample receipts using their ground
+  truth through the normal review code, so the analytics have approved data.
+  Measured after the demo review: 112 corrected fields logged, 44 approved, 1 rejected (duplicate),
+  4 left for human review (deliberate errors); 230 fact rows, 24 items, 0 unmapped descriptions.
+
 ## Next
 
-- **M6.1 Item normalization:** `src/normalize.py`, `mart.item_mapping`.
+- **M6.2 Price tracking:** price history views and increase alerts.
 
 ## Open issues
 
@@ -207,3 +217,11 @@
 - Mocking external services in tests (`monkeypatch`)
 - JSONB columns and `psycopg.types.json.Jsonb`
 - `functools.lru_cache`
+
+### M6.1
+- Master data / item normalization with rule tables
+- Pattern matching (`ILIKE` wildcards -> regex), most-specific rule wins
+- Unit conversion and standard units (lb, each, L)
+- Unit price per standard unit
+- `executemany` for batch updates
+- Upsert (`ON CONFLICT ... DO UPDATE`)
