@@ -10,7 +10,7 @@ Usage:
 
 import logging
 
-from src import normalize
+from src import config, normalize
 from src.db import get_connection
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,12 @@ WHERE r.review_status = 'approved'
 """
 
 
+UPSERT_SETTING = """
+INSERT INTO mart.setting (name, value) VALUES (%s, %s)
+ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value
+"""
+
+
 def build_mart(conn=None):
     """Rebuild the mart. Returns a dict of row counts."""
     own_connection = conn is None
@@ -90,6 +96,9 @@ def build_mart(conn=None):
             conn.execute(INSERT_FACTS, (UNKNOWN_DATE_KEY, UNKNOWN_VENDOR))
             # 4. Map descriptions to items and convert to standard units
             normalize.normalize_facts(conn)
+            # 5. Settings the price views read (threshold comes from .env)
+            conn.execute(UPSERT_SETTING, ("price_alert_threshold_pct",
+                                          str(config.PRICE_ALERT_THRESHOLD_PCT)))
         counts = {}
         for table in ("dim_vendor", "dim_item", "dim_date", "fact_purchase_line"):
             # table names come from the fixed tuple above, not from input

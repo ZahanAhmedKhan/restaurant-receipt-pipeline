@@ -92,9 +92,15 @@
   Measured after the demo review: 112 corrected fields logged, 44 approved, 1 rejected (duplicate),
   4 left for human review (deliberate errors); 230 fact rows, 24 items, 0 unmapped descriptions.
 
+- **M6.2 Price tracking:** `sql/006_price_views.sql`: `mart.v_price_history` (price per standard unit per
+  item, vendor and date; previous price and % change via `lag()`), `mart.v_price_alerts` (rise above the
+  threshold), `mart.setting` (threshold copied from `PRICE_ALERT_THRESHOLD_PCT` in `.env` on every mart
+  build). `src/prices.py` reads them. Measured on the sample data: 228 price-history rows, 1 alert
+  (chicken breast at Harbor Fresh Foods, +14.8% on 2026-09-18, the planted price jump).
+
 ## Next
 
-- **M6.2 Price tracking:** price history views and increase alerts.
+- **M6.3 Supplier comparison:** comparison view + page.
 
 ## Open issues
 
@@ -225,3 +231,10 @@
 - Unit price per standard unit
 - `executemany` for batch updates
 - Upsert (`ON CONFLICT ... DO UPDATE`)
+
+### M6.2
+- SQL views
+- Window functions: `lag()`, `PARTITION BY`, named `WINDOW`
+- Weighted average price (sum of amounts / sum of quantities)
+- Percent change and threshold alerts
+- Config values shared with SQL through a settings table
