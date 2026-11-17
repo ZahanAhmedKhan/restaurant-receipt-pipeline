@@ -41,7 +41,7 @@ OCR_METHOD = _get("OCR_METHOD", "tesseract")
 
 # --- Gemini (optional) ---
 GEMINI_API_KEY = _get("GEMINI_API_KEY")
-GEMINI_MODEL = _get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = _get("GEMINI_MODEL", "gemini-3.8-flash")
 ALLOW_EXTERNAL_AI_ON_PRIVATE = _get("ALLOW_EXTERNAL_AI_ON_PRIVATE", "false").lower() == "true"
 
 # --- Streamlit app ---
