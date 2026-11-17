@@ -124,9 +124,14 @@
   `app/pages/9_Chatbot.py`, `tests/chatbot_questions.json` (25 questions with hand-written SQL + 5 unsafe
   requests), `python -m src.chatbot --evaluate`. Tests mock the API; 21 unsafe SQL strings are blocked.
 
+- **M8.2 Polish:** README rewritten (problem, Mermaid architecture, setup, sample-data demo, daily use,
+  scheduling, Gemini, chatbot, phone, privacy, results table with measured numbers only, "to be measured"
+  placeholder for time saved), `docs/architecture.md`, `docs/database_schema.md`. Removed the personal
+  Windows path from the README (generic `<project folder>` instead).
+
 ## Next
 
-- **M8.2 Polish:** README, `docs/architecture.md`, `docs/database_schema.md`.
+- **M8.3 Study guide:** `docs/STUDY_GUIDE.md`.
 
 ## Open issues
 
@@ -136,6 +141,8 @@
 - **Gemini comparison not run yet:** no `GEMINI_API_KEY` in `.env`. Add a key and run
   `python -m src.evaluate_ocr --method gemini` to get measured Gemini numbers.
 - **Chatbot accuracy not measured yet** (same reason). With a key: `python -m src.chatbot --evaluate`.
+- **No screenshots in the README yet:** I can't capture the browser. Load the sample data, open the
+  pages and save screenshots in `docs/screenshots/`.
 
 - Tesseract often misreads single-digit quantities (especially "1") and sometimes whole price columns on
   blurred images, so most sample receipts need review. To be compared with Gemini in M5.2.
@@ -295,3 +302,8 @@
 - Defense in depth: validator + read-only role + read-only transaction + timeout + row limit
 - SQL injection vs. prompt injection
 - Evaluating with expected answers (result comparison, not SQL text comparison)
+
+### M8.2
+- Documenting a data project: problem, architecture, setup, results
+- Mermaid diagrams (flowchart, ER diagram)
+- Reporting measured results honestly (and saying what is not measured)

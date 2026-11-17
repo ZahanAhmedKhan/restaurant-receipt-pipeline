@@ -1,16 +1,82 @@
 # Restaurant Receipt Pipeline
 
-A local data pipeline that turns photos of supplier receipts into clean, reviewed data in PostgreSQL,
-with Excel export, a Streamlit dashboard and a read-only text-to-SQL chatbot.
+A local data pipeline for a family restaurant: staff photograph supplier receipts, and the
+pipeline turns them into clean, reviewed data in PostgreSQL, with an Excel export, a Streamlit
+dashboard, price alerts, a supplier comparison and a read-only text-to-SQL chatbot.
 
-> Work in progress. See `PROGRESS.md` for status.
+Built with free, open-source tools only, running on one Windows laptop.
+
+## The problem
+
+Today every receipt is typed into Excel by hand. That is slow, receipts get entered twice,
+mistakes go unnoticed, the paper originals get lost, item names are inconsistent
+(`CHKN BRST 10LB` vs. `CHICKEN BREAST BNLS 10 LB`), and nobody can easily see whether prices
+are going up or which supplier is cheaper.
+
+## What it does
+
+- **Capture:** drop photos in `data/inbox/`, or use the app's camera / upload page (works on a phone).
+- **No duplicates:** every image is identified by its SHA-256 hash; the same photo is never stored twice.
+- **Keeps originals:** images are stored unchanged under their hash, for audit.
+- **Reads receipts:** Tesseract OCR (free, offline) by default; Gemini as an optional comparison.
+- **Catches bad receipts:** 6 data-quality checks; anything suspicious goes to a review queue.
+- **Human review:** fix fields next to the receipt image; every change is logged.
+- **Analytics on trusted data only:** approved receipts feed a star schema (`mart`).
+- **Standard items:** messy descriptions are mapped to standard items and units (lb, each, L).
+- **Prices:** price history per item and supplier, with alerts for increases above a threshold.
+- **Suppliers:** latest prices side by side, with **estimated** monthly savings.
+- **Excel export** for the people who live in Excel, and a **chatbot** for quick questions.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Capture
+        A[data/inbox folder]
+        B[App: camera / upload]
+    end
+    A --> I
+    B --> I
+    I["ingest_image_bytes()<br/>validate JPG/PNG, SHA-256,<br/>duplicate check"] --> R[(raw.receipt_file<br/>data/raw/&lt;sha256&gt;)]
+    R --> O["OCR<br/>Tesseract (default)<br/>Gemini (optional)"]
+    O --> RO[(raw.ocr_run)]
+    RO --> P[parse.py<br/>regex rules]
+    P --> C[clean.py<br/>pandas]
+    C --> CL[(clean.receipt<br/>clean.receipt_line)]
+    CL --> Q[quality.py<br/>6 checks]
+    Q --> DQ[(dq.check_result)]
+    Q --> V{Review page<br/>fix, approve, reject}
+    V -->|corrections| CL
+    V -->|approved only| M[load_mart.py<br/>+ normalize.py]
+    M --> MART[(mart star schema<br/>+ price / supplier views)]
+    MART --> D[Streamlit dashboard]
+    MART --> X[Excel export]
+    MART --> CB["Chatbot<br/>(read-only role)"]
+```
+
+Layers: **raw** (what we received, never edited) → **clean** (standardized, reviewable) →
+**dq** (quality results) → **mart** (star schema, approved receipts only).
+More detail: [docs/architecture.md](docs/architecture.md) and
+[docs/database_schema.md](docs/database_schema.md).
+
+| Part | Tool |
+|---|---|
+| Language | Python 3.12 |
+| Database | PostgreSQL, accessed with psycopg 3 and plain SQL (no ORM) |
+| Schema changes | numbered `.sql` files in `sql/` applied by `scripts/setup_db.py` |
+| Cleaning | pandas; money as `Decimal` / `NUMERIC(12,2)` |
+| OCR | Tesseract (`pytesseract`); Gemini optional (`google-genai`) |
+| App | Streamlit (multipage), password-protected |
+| SQL safety for the chatbot | `sqlglot` + read-only PostgreSQL role |
+| Tests | pytest (339 tests) |
+| Scheduling | Windows Task Scheduler |
 
 ## Setup (Windows, PowerShell)
 
 ### 1. Python environment
 
 ```powershell
-cd "C:\Users\zahan\Documents\Restaurant Receipt Tracker"
+cd "<project folder>"
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -37,36 +103,56 @@ If activation is blocked, run this once:
 ```powershell
 Copy-Item .env.example .env
 ```
-Then edit `.env` with your real values.
+Then edit `.env`. Set `DB_APP_PASSWORD` and `DB_READONLY_PASSWORD` to long random strings.
 
 ### 4. Database (one time)
 
-Set `DB_APP_PASSWORD` and `DB_READONLY_PASSWORD` in `.env` (any long random strings), then:
-
 ```powershell
-python scripts\bootstrap_db.py      # asks for the postgres superuser password
+python scripts\bootstrap_db.py      # asks for the postgres superuser password (not saved)
 python scripts\setup_db.py          # creates the tables; safe to run again
 ```
 
 `bootstrap_db.py` creates the `receipts` and `receipts_test` databases, runs
-`sql/000_roles_and_schemas.sql` in both, and sets the two role passwords from `.env`.
-(You can also run `000_roles_and_schemas.sql` by hand in pgAdmin; see the comments at the top of the file.)
+`sql/000_roles_and_schemas.sql` in both (two roles, four schemas), and sets the role passwords
+from `.env`. You can also run `000_roles_and_schemas.sql` by hand in pgAdmin; see the comments at
+the top of the file.
 
 ### 5. Check everything works
 
 ```powershell
 python -c "import pandas, psycopg, pytesseract, PIL; print('imports ok')"
 tesseract --version
+python -m pytest -q                 # uses the receipts_test database, never the real one
 ```
 
-## Running the pipeline
+## Try it with the fake sample receipts
+
+`data/sample/` has 50 synthetic receipts from 4 made-up vendors (made by
+`scripts/make_sample_receipts.py`), each with a ground-truth JSON file. They include deliberate
+problems: 3 wrong totals, 1 subtotal that doesn't match its lines, 1 re-photographed duplicate and
+1 byte-for-byte duplicate file.
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python -m src.run_pipeline --sample   # load the 50 fake receipts (demo)
-python -m src.run_pipeline            # process new photos dropped into data\inbox\
-python -m pytest -q                   # run the tests (uses the receipts_test database)
+python -m src.run_pipeline --sample        # ingest -> OCR -> parse -> clean -> checks -> mart
+python scripts\demo_review_samples.py      # DEMO ONLY: plays the reviewer for the sample receipts
+python scripts\set_app_password.py         # choose the app password (stored only as a hash)
+streamlit run app\Home.py                  # http://localhost:8501
 ```
+
+`demo_review_samples.py` corrects the sample receipts to their ground truth through the normal
+review code (every change logged), approves the clean ones, rejects the duplicate and leaves the
+deliberately wrong ones for a human. It never touches real receipts (checked by file hash).
+
+## Daily use
+
+```powershell
+python -m src.run_pipeline       # process new photos in data\inbox\ (or let Task Scheduler do it)
+streamlit run app\Home.py        # review, export, dashboards
+python -m src.export_excel       # Excel file of approved receipts in exports\
+```
+
+App pages: **Home** (overview) · **Add Receipt** (camera or upload) · **Review** · **Export** ·
+**Items** (mapping rules) · **Spending** · **Prices** · **Suppliers** · **OCR Evaluation** · **Chatbot**.
 
 ## Run automatically every 30 minutes (Windows Task Scheduler)
 
@@ -92,9 +178,9 @@ Register-ScheduledTask -TaskName "Receipt Pipeline" -Action $action -Trigger $tr
 4. **Triggers** tab → **New…**: "On a schedule", **One time**, start now; tick **Repeat task every: 30 minutes**,
    for a duration of: **Indefinitely** → OK.
 5. **Actions** tab → **New…**: "Start a program".
-   - Program/script: `C:\Users\zahan\Documents\Restaurant Receipt Tracker\.venv\Scripts\pythonw.exe`
+   - Program/script: `<project folder>\.venv\Scripts\pythonw.exe`
    - Add arguments: `-m src.run_pipeline`
-   - Start in: `C:\Users\zahan\Documents\Restaurant Receipt Tracker`
+   - Start in: `<project folder>`
 6. **Settings** tab: "If the task is already running": **Do not start a new instance** → OK.
 
 (`pythonw.exe` runs without opening a console window.)
@@ -133,20 +219,11 @@ python -m src.chatbot "How much did we spend with each vendor?"
 python -m src.chatbot --evaluate     # score on the 25 questions in tests\chatbot_questions.json
 ```
 
-Safety: Gemini only gets the mart table structure and the question. The SQL it returns must parse
-(with `sqlglot`) as a single SELECT on `mart.` objects, gets `LIMIT 200`, and runs as the
-`receipts_readonly` role in a read-only transaction with a 5-second timeout.
-
-## The app (Streamlit)
-
-```powershell
-python scripts\set_app_password.py    # one time: choose the app password (saved only as a hash)
-streamlit run app\Home.py             # opens http://localhost:8501
-```
-
-Pages: **Add Receipt** (camera or upload), **Review**, **Export** (Excel download).
-
-Excel export from the terminal: `python -m src.export_excel` (writes `exports\receipts_<date>.xlsx`).
+Safety: Gemini only gets the mart table structure and the question, never receipt data. The SQL
+it returns must parse (with `sqlglot`) as a single SELECT on `mart.` objects, gets `LIMIT 200`, and
+runs as the `receipts_readonly` role in a read-only transaction with a 5-second timeout. The
+one-line plain-English answer sends the small result table to Gemini, so it is only produced when
+all stored images are sample receipts (or you allow it).
 
 ## Using on a phone
 
@@ -167,10 +244,61 @@ own devices can open. Nothing is put on the public internet.
 
 Do **not** use public tunnels (ngrok, Cloudflare quick tunnels, etc.) with real receipts.
 
-## Results
+## Privacy and security
 
-To be filled in with measured numbers only.
+- Runs locally. Real receipts, OCR output and exports never go in Git (`.gitignore`); the public
+  demo uses fake receipts only.
+- Secrets live in `.env` (not committed). The app password is stored only as a salted PBKDF2 hash.
+- Two database roles: `receipts_app` (pipeline and app, not a superuser) and `receipts_readonly`
+  (SELECT on `mart` only, used only by the chatbot).
+- Parameterized queries everywhere.
+- Every image is checked: JPG/PNG only (real format, not just the extension), opens and verifies in
+  Pillow, max 10 MB and 50 megapixels, saved under a server-generated name (`<sha256>.<ext>`).
+- Receipt images are never served from a static folder (`enableStaticServing = false`).
+- Logs contain IDs, counts and error types, never receipt contents.
+
+## Results (measured on the 50 synthetic sample receipts)
+
+All numbers below were measured by the code in this repo on the fake sample data. Real photos are
+messier, so real-world accuracy will be lower.
+
+| Metric | Result | How it was measured |
+|---|---|---|
+| Images processed | 50 → 49 receipts, 0 failures | `run_pipeline --sample` |
+| Duplicates caught | 2 of 2 planted: 1 exact file (hash, at ingestion), 1 re-photographed receipt (quality check) | pipeline + `dq.check_result` |
+| OCR (Tesseract): vendor / date / receipt no. / total | 100% / 100% / 100% / 96.0% | `src/evaluate_ocr.py` |
+| OCR (Tesseract): line items fully correct | 69.2% (quantity 78.8%, unit price 90.4%, line total 90.0% of matched lines) | `src/evaluate_ocr.py` |
+| OCR (Tesseract): average time | 527 ms per receipt | `src/evaluate_ocr.py` |
+| OCR (Gemini) | not measured yet (needs an API key) | `evaluate_ocr --method gemini` |
+| Data-quality failures right after OCR (49 receipts) | required fields 40, lines ≠ subtotal 20, total ≠ subtotal + tax 6, duplicate 1, invalid date 0, negative 0 → 41 sent to review | `src/quality.py` |
+| Review (demo reviewer on sample data) | 112 field corrections logged; 44 approved, 1 rejected, 4 left for a human | `scripts/demo_review_samples.py` |
+| Items tracked | 24 standard items, 0 unmapped descriptions | `mart.dim_item` |
+| Price alerts | 1 (the planted +14.8% chicken breast increase) | `mart.v_price_alerts` |
+| Suppliers compared | 5 items across 4 suppliers | `mart.v_supplier_savings` |
+| Estimated monthly savings | $57.33 (**estimate**: ignores delivery fees, minimums, quality, availability) | `mart.v_supplier_savings` |
+| Chatbot accuracy | not measured yet (needs an API key); safety: 21 of 21 unsafe test queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
+| Automated tests | 339 passing | `python -m pytest` |
+
+Full OCR report: [docs/ocr_evaluation.md](docs/ocr_evaluation.md).
 
 ### Manual-entry time saved
 
-To be measured.
+To be measured (with the family, on real receipts).
+
+## Screenshots
+
+Not added yet. To add them: load the sample data (see above), open each page, and save
+screenshots in `docs/screenshots/`.
+
+## Project layout
+
+```
+sql/        numbered schema files (000 run by the superuser, 001+ by setup_db.py) and queries/
+src/        pipeline code (ingest, ocr, parse, clean, quality, review, load_mart, normalize,
+            prices, export_excel, evaluate_ocr, chatbot, run_pipeline, ...)
+app/        Streamlit app (Home.py + pages/)
+scripts/    setup, sample generator, demo reviewer, app password
+tests/      pytest tests (+ chatbot_questions.json)
+docs/       architecture, database schema, OCR evaluation
+data/       inbox/ raw/ failed/ private/ (all gitignored) and sample/ (fake receipts)
+```
