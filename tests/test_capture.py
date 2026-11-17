@@ -89,7 +89,7 @@ def test_home_asks_for_password_and_accepts_correct_one(monkeypatch, db_conn):
 
     app.text_input[0].input("letmein!")
     app.button[0].click().run()
-    assert len(app.metric) == 4                    # status counts visible after login
+    assert len(app.metric) == 7                    # overview numbers visible after login
 
 
 def test_add_receipt_page_is_protected(monkeypatch):

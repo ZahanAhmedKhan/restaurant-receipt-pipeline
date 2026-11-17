@@ -111,12 +111,21 @@
   0/1/2. Inbox files that crash are moved to `data/failed/`; files whose cleaning crashes get status
   `failed` and the run continues. README has exact Task Scheduler steps (PowerShell command and by hand).
 
+- **M7.2 Dashboard pages:** Home is now the Overview (approved spend, receipt counts, review status,
+  data-quality failures by check); `5_Spending.py` (date filter; spend by month stacked by vendor, by vendor,
+  top items), `6_Prices.py` (alerts table + price-history line chart per vendor), `7_Suppliers.py` (M6.3),
+  `8_OCR_Evaluation.py` (results from `docs/ocr_evaluation.json`). Queries in `src/dashboard.py`; Altair
+  chart helpers in `app/charts.py` (fixed vendor colors, hover tooltips, a table view under every chart).
+
 ## Next
 
-- **M7.2 Dashboard pages:** Overview, Spending, Prices, Suppliers, OCR Evaluation.
+- **M8.1 Text-to-SQL chatbot:** `src/chatbot.py`, chatbot page, 25-question evaluation.
 
 ## Open issues
 
+- **Dashboard charts not visually checked by me:** the page tests confirm every page renders without
+  errors, but I couldn't render the charts to an image to look at them. Please open the app and check the
+  Spending and Prices charts look right.
 - **Gemini comparison not run yet:** no `GEMINI_API_KEY` in `.env`. Add a key and run
   `python -m src.evaluate_ocr --method gemini` to get measured Gemini numbers.
 
@@ -264,3 +273,10 @@
 - Log files and log rotation (`RotatingFileHandler`)
 - Exit codes
 - Fault isolation: one bad file doesn't stop the run
+
+### M7.2
+- Dashboard design: headline numbers first, then breakdowns
+- Choosing a chart form (bars for comparison, lines for change over time)
+- Consistent categorical colors per entity; tooltips; table view for accessibility
+- Altair / Vega-Lite basics (mark, encode, scale)
+- Date-range filters and parameterized `BETWEEN` queries

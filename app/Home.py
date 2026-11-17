@@ -1,4 +1,4 @@
-"""Home page of the receipts app.
+"""Home / Overview page of the receipts app.
 
 Start the app (from the project folder):
     streamlit run app/Home.py
@@ -8,24 +8,50 @@ import app_common
 
 app_common.setup_page("Receipts")
 
+import charts  # noqa: E402
 import streamlit as st  # noqa: E402
 
+from src import dashboard  # noqa: E402
+
+conn = app_common.db()
 st.title("🧾 Restaurant Receipts")
-st.write("Use the menu on the left:")
-st.markdown(
-    "- **Add Receipt**: take a photo or upload receipt images\n"
-    "- **Review**: check what was read, fix mistakes, approve or reject\n"
-    "- **Export**: download approved receipts as an Excel file"
-)
+st.caption("Add Receipt · Review · Export · Items · Spending · Prices · Suppliers · OCR Evaluation "
+           "(menu on the left)")
 
-# Small status overview: how many receipts are in each review state
-rows = app_common.db().execute(
-    "SELECT review_status, count(*) FROM clean.receipt GROUP BY review_status"
-).fetchall()
-counts = {status: count for status, count in rows}
+stats = dashboard.overview_stats(conn)
 
+# --- spend and receipts ------------------------------------------------------------
+st.subheader("Overview")
+col1, col2, col3 = st.columns(3)
+col1.metric("Approved spend", f"${stats['approved_spend']:,.2f}")
+col2.metric("Receipts", stats["receipts"])
+col3.metric("Images received", stats["files"])
+
+# --- review status -------------------------------------------------------------------
+st.subheader("Review status")
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Needs review", counts.get("needs_review", 0))
-col2.metric("Pending", counts.get("pending", 0))
-col3.metric("Approved", counts.get("approved", 0))
-col4.metric("Rejected", counts.get("rejected", 0))
+col1.metric("Needs review", stats["needs_review"])
+col2.metric("Pending", stats["pending"])
+col3.metric("Approved", stats["approved"])
+col4.metric("Rejected", stats["rejected"])
+st.caption(f"Corrections made in review: {stats['corrections']} · "
+           f"Images that could not be processed: {stats['failed_files']}")
+
+# --- data quality ------------------------------------------------------------------------
+st.subheader("Data quality")
+failures = dashboard.dq_failures(conn)
+if failures.empty:
+    st.info("No quality checks have run yet.")
+else:
+    failing = failures[failures["failing"] > 0].copy()
+    if failing.empty:
+        st.success("Every receipt passes every check.")
+    else:
+        failing["check"] = failing["check_name"].str.replace("_", " ")
+        chart = charts.bar_chart(failing, "check", "failing", value_title="Receipts failing")
+        # failing is a count, not money: plain number format
+        chart = chart.encode(x=charts.alt.X("failing:Q", title="Receipts failing"),
+                             tooltip=["check", "failing", "checked"])
+        st.altair_chart(chart, width="stretch")
+    with st.expander("Table"):
+        st.dataframe(failures, hide_index=True, width="stretch")
