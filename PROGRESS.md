@@ -70,9 +70,15 @@
   5 example queries in `sql/queries/`. The mart rebuild runs at the end of `run_pipeline.py` and after
   approve/reject/reopen on the Review page. Tests: same counts on rerun, fact total = approved line total.
 
+- **M5.1 OCR evaluation:** `src/evaluate_ocr.py` compares extraction (same code as the pipeline) with the
+  ground truth; writes `docs/ocr_evaluation.md` and `docs/ocr_evaluation.json`.
+  Measured, Tesseract on the 50 sample receipts: vendor 100%, date 100%, receipt number 100%,
+  total 96.0%; line items found 100%, fully correct 69.2% (quantity 78.8%, unit price 90.4%,
+  line total 90.0% of matched lines); average 527 ms per receipt.
+
 ## Next
 
-- **M5.1 OCR evaluation:** `src/evaluate_ocr.py`, `docs/ocr_evaluation.md`.
+- **M5.2 Gemini option:** `run_gemini()` in `src/ocr.py`, comparison.
 
 ## Open issues
 
@@ -178,3 +184,10 @@
 - Reconciliation tests
 - Window functions (`sum() OVER ()`, `lag()`), CTEs (`WITH`)
 - Data lineage
+
+### M5.1
+- Evaluating extraction against labelled ground truth
+- Field-level accuracy vs. record-level ("fully correct") accuracy
+- Fuzzy matching of records (`difflib.SequenceMatcher`), greedy one-to-one matching
+- Tolerances for money comparison
+- Reporting only measured numbers; limits of synthetic test data
