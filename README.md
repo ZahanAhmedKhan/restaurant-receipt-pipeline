@@ -68,6 +68,45 @@ python -m src.run_pipeline            # process new photos dropped into data\inb
 python -m pytest -q                   # run the tests (uses the receipts_test database)
 ```
 
+## Run automatically every 30 minutes (Windows Task Scheduler)
+
+The pipeline is safe to run on a schedule: a lock file (`pipeline.lock`) stops two runs from
+overlapping, files that crash go to `data\failed\`, and everything is logged to `logs\pipeline.log`
+(IDs, counts and error types only, never receipt contents).
+
+**Option A: one PowerShell command.** Run it from the project folder:
+
+```powershell
+$project = (Get-Location).Path
+$action  = New-ScheduledTaskAction -Execute "$project\.venv\Scripts\pythonw.exe" -Argument "-m src.run_pipeline" -WorkingDirectory $project
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 30)
+$settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable
+Register-ScheduledTask -TaskName "Receipt Pipeline" -Action $action -Trigger $trigger -Settings $settings -Description "Process receipt photos in data\inbox"
+```
+
+**Option B: by hand.**
+
+1. Open **Task Scheduler** (Start menu, type "Task Scheduler").
+2. **Action → Create Task…**
+3. **General** tab: Name `Receipt Pipeline`. Choose "Run only when user is logged on".
+4. **Triggers** tab → **New…**: "On a schedule", **One time**, start now; tick **Repeat task every: 30 minutes**,
+   for a duration of: **Indefinitely** → OK.
+5. **Actions** tab → **New…**: "Start a program".
+   - Program/script: `C:\Users\zahan\Documents\Restaurant Receipt Tracker\.venv\Scripts\pythonw.exe`
+   - Add arguments: `-m src.run_pipeline`
+   - Start in: `C:\Users\zahan\Documents\Restaurant Receipt Tracker`
+6. **Settings** tab: "If the task is already running": **Do not start a new instance** → OK.
+
+(`pythonw.exe` runs without opening a console window.)
+
+**Check it works:** right-click the task → **Run**, then look at the end of the log:
+```powershell
+Get-Content logs\pipeline.log -Tail 5
+```
+Exit codes: `0` done, `1` error (details in the log), `2` skipped because another run was still going.
+
+To remove it: `Unregister-ScheduledTask -TaskName "Receipt Pipeline"`
+
 ## OCR evaluation and the optional Gemini method
 
 ```powershell

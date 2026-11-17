@@ -246,7 +246,14 @@ def process_pending(conn=None):
         vendor_map = load_vendor_map(conn)
         receipt_ids = []
         for file_id in file_ids:
-            receipt_ids.append(process_file(conn, file_id, vendor_map))
+            try:
+                receipt_ids.append(process_file(conn, file_id, vendor_map))
+            except Exception as error:
+                # Keep going with the other files. The raw file stays for audit;
+                # status 'failed' keeps it out of the next runs.
+                conn.execute("UPDATE raw.receipt_file SET status = 'failed' WHERE file_id = %s",
+                             (file_id,))
+                logger.error("Cleaning failed file_id=%s error=%s", file_id, type(error).__name__)
         return receipt_ids
     finally:
         if own_connection:

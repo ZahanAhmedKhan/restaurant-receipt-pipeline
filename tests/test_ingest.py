@@ -105,8 +105,8 @@ def test_scan_inbox_twice_inserts_each_file_once(db_conn, tmp_path):
     first = ingest.scan_inbox(conn=db_conn, inbox_dir=inbox, raw_dir=raw, failed_dir=failed)
     second = ingest.scan_inbox(conn=db_conn, inbox_dir=inbox, raw_dir=raw, failed_dir=failed)
 
-    assert first == {"new": 2, "duplicate": 0, "rejected": 1, "skipped": 0}
-    assert second == {"new": 0, "duplicate": 0, "rejected": 0, "skipped": 0}
+    assert first == {"new": 2, "duplicate": 0, "rejected": 1, "skipped": 0, "crashed": 0}
+    assert second == {"new": 0, "duplicate": 0, "rejected": 0, "skipped": 0, "crashed": 0}
     assert count_files(db_conn) == 2
     assert len(list(failed.iterdir())) == 1        # the .txt file
 

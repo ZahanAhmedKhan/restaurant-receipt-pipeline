@@ -106,9 +106,14 @@
   Measured on the sample data: 5 items compared, estimated monthly savings $57.33 in total
   (canola oil $32.37, yellow onions $12.79, chicken breast $9.23, ground beef $1.98, jasmine rice $0.96).
 
+- **M7.1 Scheduled runs:** `run_pipeline.py` now has a lock file (`pipeline.lock`, created atomically with
+  `O_EXCL`; locks older than 2 hours count as stale), a rotating log in `logs/pipeline.log`, and exit codes
+  0/1/2. Inbox files that crash are moved to `data/failed/`; files whose cleaning crashes get status
+  `failed` and the run continues. README has exact Task Scheduler steps (PowerShell command and by hand).
+
 ## Next
 
-- **M7.1 Scheduled runs:** lock file, log file, failed files, Task Scheduler steps.
+- **M7.2 Dashboard pages:** Overview, Spending, Prices, Suppliers, OCR Evaluation.
 
 ## Open issues
 
@@ -252,3 +257,10 @@
 - Window functions `min() OVER`, `first_value()`, `count() OVER`
 - Stacked CTEs and `CROSS JOIN`
 - Estimates vs. measurements; stating assumptions
+
+### M7.1
+- Scheduling with Windows Task Scheduler
+- Lock files and atomic file creation (`O_CREAT | O_EXCL`), stale locks
+- Log files and log rotation (`RotatingFileHandler`)
+- Exit codes
+- Fault isolation: one bad file doesn't stop the run

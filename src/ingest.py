@@ -158,11 +158,13 @@ def scan_inbox(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None,
 
     - new / duplicate: the file is removed from the inbox (a copy is in data/raw/)
     - rejected:        the file is moved to data/failed/ and the reason is logged
+    - crashed:         (unexpected error) moved to data/failed/, error type logged,
+                       and the scan goes on with the next file
     Returns a dict of counts.
     """
     inbox_dir = Path(inbox_dir or config.INBOX_DIR)
     failed_dir = Path(failed_dir or config.FAILED_DIR)
-    counts = {"new": 0, "duplicate": 0, "rejected": 0, "skipped": 0}
+    counts = {"new": 0, "duplicate": 0, "rejected": 0, "skipped": 0, "crashed": 0}
     now = time.time()
 
     for path in sorted(inbox_dir.iterdir()):
@@ -172,9 +174,15 @@ def scan_inbox(conn=None, inbox_dir=None, raw_dir=None, failed_dir=None,
             counts["skipped"] += 1        # may still be copying; next run gets it
             continue
 
-        status, value = ingest_image_bytes(
-            path.read_bytes(), path.name, "inbox", conn=conn, raw_dir=raw_dir
-        )
+        try:
+            status, value = ingest_image_bytes(
+                path.read_bytes(), path.name, "inbox", conn=conn, raw_dir=raw_dir
+            )
+        except Exception as error:
+            counts["crashed"] += 1
+            move_to_failed(path, failed_dir)
+            logger.error("Crashed on inbox file %s: %s", path.name, type(error).__name__)
+            continue
         counts[status] += 1
         if status == "rejected":
             move_to_failed(path, failed_dir)
