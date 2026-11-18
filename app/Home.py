@@ -3,7 +3,7 @@
 Start the app (from the project folder):
     streamlit run app/Home.py
 
-Staff password     -> Start, Add receipt, Check receipts, Excel, Ask a question
+Staff password     -> Start, Add receipt, Check receipts, All receipts, Excel, Ask a question
 Developer password -> everything (daily pages + analytics + setup)
 """
 
@@ -17,9 +17,10 @@ import streamlit as st  # noqa: E402
 start = st.Page("pages/Start.py", title="Start", icon="🏠", default=True)
 add = st.Page("pages/1_Add_Receipt.py", title="Add receipt", icon="📷")
 check = st.Page("pages/2_Review.py", title="Check receipts", icon="✅")
+everything = st.Page("pages/All_Receipts.py", title="All receipts", icon="🗂️")
 excel = st.Page("pages/3_Export.py", title="Excel", icon="📊")
 ask = st.Page("pages/9_Chatbot.py", title="Ask a question", icon="💬")
-daily = [start, add, check, excel, ask]
+daily = [start, add, check, everything, excel, ask]
 
 if app_common.is_developer():
     menu = {

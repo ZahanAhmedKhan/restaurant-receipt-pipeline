@@ -21,6 +21,7 @@ else:
 st.write("What do you want to do?")
 st.page_link("pages/1_Add_Receipt.py", label="Add a receipt (photo or file)", icon="📷")
 st.page_link("pages/2_Review.py", label="Check and approve receipts", icon="✅")
+st.page_link("pages/All_Receipts.py", label="See all receipts", icon="🗂️")
 st.page_link("pages/3_Export.py", label="Download the Excel file", icon="📊")
 st.page_link("pages/9_Chatbot.py", label="Ask a question about purchases", icon="💬")
 

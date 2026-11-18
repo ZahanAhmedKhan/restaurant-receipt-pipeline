@@ -118,6 +118,43 @@ def list_receipts(conn, status):
     ).fetchall()
 
 
+def all_receipts(conn, status=None, vendor=None, search=None):
+    """Every receipt (newest first) for the All receipts page, with optional filters.
+
+    status: one review status or None for all; vendor: exact supplier name or None;
+    search: text found in the supplier, receipt number or an item description.
+    Returns a list of dicts.
+    """
+    rows = conn.execute(
+        """
+        SELECT r.receipt_id, r.vendor_name, r.receipt_date, r.receipt_number, r.total,
+               r.review_status, count(l.line_id) AS items
+        FROM clean.receipt r
+        LEFT JOIN clean.receipt_line l ON l.receipt_id = r.receipt_id
+        WHERE (%(status)s::text IS NULL OR r.review_status = %(status)s)
+          AND (%(vendor)s::text IS NULL OR r.vendor_name = %(vendor)s)
+          AND (%(search)s::text IS NULL
+               OR r.vendor_name ILIKE %(pattern)s
+               OR r.receipt_number ILIKE %(pattern)s
+               OR EXISTS (SELECT 1 FROM clean.receipt_line s
+                          WHERE s.receipt_id = r.receipt_id AND s.description ILIKE %(pattern)s))
+        GROUP BY r.receipt_id
+        ORDER BY r.receipt_date DESC NULLS LAST, r.receipt_id DESC
+        """,
+        {"status": status, "vendor": vendor, "search": search or None,
+         "pattern": f"%{search}%" if search else None},
+    ).fetchall()
+    columns = ["receipt_id", "vendor_name", "receipt_date", "receipt_number", "total",
+               "review_status", "items"]
+    return [dict(zip(columns, row)) for row in rows]
+
+
+def vendor_names(conn):
+    return [row[0] for row in conn.execute(
+        "SELECT DISTINCT vendor_name FROM clean.receipt WHERE vendor_name IS NOT NULL ORDER BY 1"
+    ).fetchall()]
+
+
 def get_receipt(conn, receipt_id):
     """Everything the review page shows for one receipt."""
     receipt, lines = quality.load_receipt(conn, receipt_id)

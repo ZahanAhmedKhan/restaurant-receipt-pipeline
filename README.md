@@ -194,7 +194,7 @@ will flag the receipt if the lines no longer add up).
 
 | Login | Menu |
 |---|---|
-| Staff password | Start · Add receipt · Check receipts · Excel · Ask a question (plain wording, no technical details) |
+| Staff password | Start · Add receipt · Check receipts · All receipts · Excel · Ask a question (plain wording, no technical details) |
 | Developer password | the same, plus **Analytics** (Overview, Spending, Prices, Suppliers) and **Setup and quality** (Item rules, OCR evaluation), check names, change history and the chatbot's SQL |
 
 Developer-only pages refuse a staff login even if the address is typed in directly.
@@ -342,7 +342,7 @@ All numbers below were measured by the code in this repo on the fake sample data
 | Chatbot accuracy (Gemini text-to-SQL) | **22 of 25** questions answered correctly (88%); 2 wrong, 1 not answered because every Gemini model was busy at that moment | `python -m src.chatbot --evaluate` |
 | Chatbot safety | 5 unsafe requests: Gemini wrote harmful SQL for 3 (DELETE, DROP, CREATE TABLE), all 3 blocked; the other 2 came back as harmless read-only queries; 0 data changed or exposed. Unit tests: 21 of 21 attack queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
 | Chatbot response time | 1.0–2.1 s per question (3 questions timed) | `chatbot.ask` |
-| Automated tests | 392 passing | `python -m pytest` |
+| Automated tests | 396 passing | `python -m pytest` |
 
 Full OCR report: [docs/ocr_evaluation.md](docs/ocr_evaluation.md).
 
