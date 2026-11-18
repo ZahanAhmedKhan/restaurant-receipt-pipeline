@@ -55,9 +55,15 @@ if asked and question.strip():
         st.error("Sorry, I couldn't answer that. Try asking in a different way."
                  + (f" ({output['error']})" if developer else ""))
     else:
-        if output["answer"]:
+        if output["result"].empty:
+            st.info("Nothing found for that question. Only approved receipts can be searched; "
+                    "receipt numbers are shown on the Check receipts page. To see a receipt's "
+                    "photo, open it on Check receipts.")
+            output["answer"] = None
+        elif output["answer"]:
             st.success(output["answer"])
-        st.dataframe(output["result"], hide_index=True, width="stretch")
+        if not output["result"].empty:
+            st.dataframe(output["result"], hide_index=True, width="stretch")
         if not output["answer"] and developer:
             st.caption("Plain-English answers are off for real data (they would send the result "
                        "table to Gemini). Set ALLOW_EXTERNAL_AI_ON_PRIVATE=true to allow them.")
