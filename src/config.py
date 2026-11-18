@@ -41,12 +41,25 @@ OCR_METHOD = _get("OCR_METHOD", "tesseract")
 
 # --- Gemini (optional) ---
 GEMINI_API_KEY = _get("GEMINI_API_KEY")
-GEMINI_MODEL = _get("GEMINI_MODEL", "gemini-3.8-flash")
+GEMINI_MODEL = _get("GEMINI_MODEL", "gemini-3.5-flash-lite")
+# Tried in order when a model is overloaded (comma-separated in .env)
+GEMINI_FALLBACK_MODELS = [m.strip() for m in _get(
+    "GEMINI_FALLBACK_MODELS", "gemini-3.5-flash-lite,gemini-3.1-flash-lite"
+).split(",") if m.strip()]
 ALLOW_EXTERNAL_AI_ON_PRIVATE = _get("ALLOW_EXTERNAL_AI_ON_PRIVATE", "false").lower() == "true"
 
 # --- Streamlit app ---
 APP_PASSWORD_HASH = _get("APP_PASSWORD_HASH")              # staff password
 DEVELOPER_PASSWORD_HASH = _get("DEVELOPER_PASSWORD_HASH")  # developer password
+
+# --- Country ---
+# Optional: accept only receipts from one country (e.g. CA = Canada). Receipts
+# clearly from another country are then rejected automatically.
+# Empty (the default) = receipts from every country are accepted.
+ALLOWED_COUNTRY = (_get("ALLOWED_COUNTRY", "") or "").upper()
+
+# Order of day and month in dates like 06/07/2026: MDY (June 7) or DMY (6 July)
+DATE_ORDER = (_get("DATE_ORDER", "MDY") or "MDY").upper()
 
 # --- Price alerts ---
 PRICE_ALERT_THRESHOLD_PCT = float(_get("PRICE_ALERT_THRESHOLD_PCT", "10"))

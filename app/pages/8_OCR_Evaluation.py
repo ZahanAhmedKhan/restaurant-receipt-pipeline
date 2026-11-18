@@ -9,7 +9,7 @@ import streamlit as st  # noqa: E402
 from src import dashboard  # noqa: E402
 
 st.title("OCR evaluation")
-st.write("How well each method read the 50 fake sample receipts, compared with their "
+st.write("How well each method read the 51 fake sample receipts, compared with their "
          "ground truth. These numbers were measured by `python -m src.evaluate_ocr`.")
 
 results = dashboard.ocr_results()

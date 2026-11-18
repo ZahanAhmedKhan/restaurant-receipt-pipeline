@@ -1,50 +1,44 @@
 {
-  "file": "receipt_050.jpg",
-  "vendor": "Sunrise Meat Co.",
-  "date": "2026-06-29",
-  "receipt_number": "SMC-3162",
+  "file": "receipt_050.png",
+  "vendor": "Golden Valley Produce",
+  "country": "CA",
+  "date": "2026-07-10",
+  "receipt_number": "GVP500328",
   "lines": [
     {
-      "description": "LAMB LEG BNLS 4.5KG",
+      "description": "TOMATOES ROMA 25 LB",
       "quantity": "5",
-      "unit": "EA",
-      "unit_price": "72.00",
-      "line_total": "360.00"
-    },
-    {
-      "description": "GROUND BEEF 80/20 10 LB",
-      "quantity": "2",
       "unit": "CS",
-      "unit_price": "46.50",
-      "line_total": "93.00"
+      "unit_price": "31.39",
+      "line_total": "156.95"
     },
     {
-      "description": "GOAT CUBES",
-      "quantity": "19.17",
-      "unit": "LB",
-      "unit_price": "6.25",
-      "line_total": "119.81"
+      "description": "POTATO RUSSET 50LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "26.56",
+      "line_total": "106.24"
     },
     {
-      "description": "CHICKEN BREAST BNLS 10 LB",
+      "description": "GARLIC PEELED 5LB",
+      "quantity": "4",
+      "unit": "BAG",
+      "unit_price": "16.69",
+      "line_total": "66.76"
+    },
+    {
+      "description": "LETTUCE ROMAINE 24CT",
       "quantity": "1",
       "unit": "CS",
-      "unit_price": "30.90",
-      "line_total": "30.90"
-    },
-    {
-      "description": "BEEF BRISKET",
-      "quantity": "27.15",
-      "unit": "LB",
-      "unit_price": "4.89",
-      "line_total": "132.76"
+      "unit_price": "34.06",
+      "line_total": "34.06"
     }
   ],
-  "subtotal": "736.47",
+  "subtotal": "364.01",
   "tax": "0.00",
-  "total": "736.47",
+  "total": "364.01",
   "deliberate_errors": [
-    "duplicate_file"
+    "duplicate_receipt"
   ],
-  "duplicate_of": "receipt_007"
+  "duplicate_of": "receipt_011"
 }

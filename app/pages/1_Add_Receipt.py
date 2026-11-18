@@ -37,6 +37,9 @@ def show_result(result, name):
             st.warning(f"⚠️ Duplicate, already saved as receipt #{result['receipt_id']} ({name})")
         else:
             st.warning(f"⚠️ Duplicate, this image was already saved ({name})")
+    elif status == "wrong_country":
+        st.error(f"❌ Rejected: this receipt is not from Canada ({result['reason']}). "
+                 f"Saved as receipt #{result['receipt_id']} with status Rejected ({name})")
     elif status == "ocr_failed":
         st.error(f"❌ Saved, but the text could not be read. Try a sharper photo ({name})")
     else:

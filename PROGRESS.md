@@ -149,6 +149,22 @@
   history and no SQL. Developer-only pages refuse a staff login. Note: CLAUDE.md says "no user-role
   systems"; this was added at the owner's request and kept to two passwords (no accounts).
 
+- **Extra (requested): country rule, now optional.** `src/country.py` detects Canada / Australia / USA from
+  receipt text (postal codes, provinces/states, HST/GST/HST/PST/QST, business numbers, ABN, ZIP). Quality
+  check `from_allowed_country` + automatic rejection of clearly foreign receipts when `ALLOWED_COUNTRY` is
+  set; **off by default** (any country accepted) at the owner's request. Parser reads HST, GST/HST, GST+PST,
+  TPS+TVQ and adds them up. Demo receipts are now (fake) Ontario suppliers + 1 Australian receipt (51 files).
+  `scripts/reset_data.py --demo | --all` to remove receipt data and start fresh.
+- **Extra (requested): evaluation on real receipts.** `src/evaluate_sroie.py` on the public SROIE dataset
+  (626 labelled Malaysian receipts, downloaded to `data/external/`, not committed). Dev split 000–299 used to
+  improve the parser; test split 300–625 held out. New general rules in `parse.py`: final total = last
+  total-type line with one amount (skips sub-totals, tax lines, summaries; reads `RM 2.50`, `5,90`, `11. 80`),
+  date anywhere (prefers a line labelled DATE). `DATE_ORDER` (MDY/DMY) in `.env`.
+  Measured on the held-out 326: total 20.9% → 60.7%, date 1.9% → 77.1%. No change on the synthetic samples.
+- **Gemini reliability:** `src/gemini_client.py`: 10 s timeout per model, no hidden retries, falls back through
+  `GEMINI_FALLBACK_MODELS` when a model is busy (503/504/429). Default model `gemini-3.5-flash-lite`. The
+  chatbot page caches the SQL per question for 10 minutes. Measured: chatbot 22/25 correct; 1.0–2.1 s per question.
+
 ## Next
 
 All milestones are built. Remaining items need you (see Open issues): add a Gemini key and run the two

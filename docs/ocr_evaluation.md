@@ -1,24 +1,24 @@
 # OCR evaluation
 
-Measured by `python -m src.evaluate_ocr` on the 50 synthetic sample receipts in `data/sample/`
+Measured by `python -m src.evaluate_ocr` on the 51 synthetic sample receipts in `data/sample/`
 (fake vendors, ground truth in the matching JSON files). Numbers below are what the script measured.
 
 | Metric | tesseract |
 |---|---|
-| Receipts evaluated | 50 |
+| Receipts evaluated | 51 |
 | Extraction errors | 0 |
 | Vendor correct | 100.0% |
-| Date correct | 100.0% |
+| Date correct | 98.0% |
 | Receipt number correct | 100.0% |
-| Total correct (±$0.01) | 96.0% |
-| True line items | 260 |
-| Line items found (matched) | 100.0% |
-| Line items fully correct | 69.2% |
-| Quantity correct (matched lines) | 78.8% |
-| Unit price correct (matched lines) | 90.4% |
-| Line total correct (matched lines) | 90.0% |
-| Average time per receipt | 527 ms |
-| Run date | 2026-11-16 |
+| Total correct (±$0.01) | 96.1% |
+| True line items | 263 |
+| Line items found (matched) | 98.5% |
+| Line items fully correct | 73.0% |
+| Quantity correct (matched lines) | 84.2% |
+| Unit price correct (matched lines) | 88.8% |
+| Line total correct (matched lines) | 89.2% |
+| Average time per receipt | 540 ms |
+| Run date | 2026-11-17 |
 
 ## Method
 

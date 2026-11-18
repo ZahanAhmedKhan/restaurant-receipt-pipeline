@@ -129,10 +129,11 @@ python -m pytest -q                 # uses the receipts_test database, never the
 
 ## Try it with the fake sample receipts
 
-`data/sample/` has 50 synthetic receipts from 4 made-up vendors (made by
-`scripts/make_sample_receipts.py`), each with a ground-truth JSON file. They include deliberate
-problems: 3 wrong totals, 1 subtotal that doesn't match its lines, 1 re-photographed duplicate and
-1 byte-for-byte duplicate file.
+`data/sample/` has 51 synthetic receipts (made by `scripts/make_sample_receipts.py`), each with a
+ground-truth JSON file: 50 from 4 made-up Ontario suppliers (postal codes, GST/HST numbers, 13% HST
+on supplies) and 1 from a made-up Australian supplier. They include deliberate problems: 3 wrong
+totals, 1 subtotal that doesn't match its lines, 1 re-photographed duplicate, 1 byte-for-byte
+duplicate file and the non-Canadian receipt.
 
 ```powershell
 python -m src.run_pipeline --sample        # ingest -> OCR -> parse -> clean -> checks -> mart
@@ -145,6 +146,36 @@ streamlit run app\Home.py                  # http://localhost:8501
 `demo_review_samples.py` corrects the sample receipts to their ground truth through the normal
 review code (every change logged), approves the clean ones, rejects the duplicate and leaves the
 deliberately wrong ones for a human. It never touches real receipts (checked by file hash).
+
+## Receipts from any country (optional country rule)
+
+By default receipts from **every country, store and restaurant** are accepted. Dates like
+`06/07/2026` are read month-first; set `DATE_ORDER=DMY` in `.env` for day-first countries.
+
+Optionally, accept only one country by setting `ALLOWED_COUNTRY=CA` (or `US`, `AU`) in `.env`.
+"$" and store names don't tell the country (Costco is in Canada, the US and Australia), so
+`src/country.py` looks for signs only one country prints:
+
+- **Canada:** postal code (`L5R 3T7`), province + postal code, `HST`, `GST/HST`, `PST`, `QST`/`TVQ`/`TPS`,
+  GST/HST business number (`121476329 RT0001`), "Canada"/"CAD".
+- **Australia:** `ABN`, state + 4-digit postcode (`NSW 2144`), "Australia"/"AUD".
+- **USA:** state + 5-digit ZIP (`WA 98027`), "sales tax", "USA".
+
+With the rule on, a receipt that is clearly from another country is **rejected automatically**
+(kept with status Rejected; the reason is logged). A receipt with no clear signs (e.g. OCR missed the address) goes
+to **Check receipts** so a person decides. Plain "GST" alone is not a Canadian sign (Australia
+uses it too). Tax lines `HST`, `GST/HST`, `GST` + `PST`, `TPS` + `TVQ` are read and added up.
+
+## Start fresh with real receipts
+
+```powershell
+python scripts\reset_data.py --all     # removes EVERY receipt and its data (asks you to type YES)
+python scripts\reset_data.py --demo    # or: remove only the fake demo receipts
+```
+
+This keeps the database structure, item rules, vendor names, settings, passwords, `data\sample\`
+and `data\private\`. Real receipt images are stored in `data\raw\`, which is never committed to Git,
+and they are never sent to Gemini.
 
 ## Daily use
 
@@ -271,27 +302,47 @@ Do **not** use public tunnels (ngrok, Cloudflare quick tunnels, etc.) with real 
 - Receipt images are never served from a static folder (`enableStaticServing = false`).
 - Logs contain IDs, counts and error types, never receipt contents.
 
-## Results (measured on the 50 synthetic sample receipts)
+## Results on real receipts (public SROIE dataset)
 
-All numbers below were measured by the code in this repo on the fake sample data. Real photos are
-messier, so real-world accuracy will be lower.
+Measured by `python -m src.evaluate_sroie` on **626 real, labelled receipts** from the public SROIE
+dataset (ICDAR 2019, Malaysian shops), using the same code path as the pipeline
+(Tesseract → `parse.py` → `clean.py`). The parser's total/date rules were improved using only the
+**dev split** (receipts 000–299); the **test split** (300–625, 326 receipts) was held out and never
+looked at while changing code.
+
+| Metric (held-out test split, 326 real receipts) | Before | After |
+|---|---|---|
+| Total amount correct (±$0.01) | 20.9% | **60.7%** |
+| Date correct | 1.9% | **77.1%** |
+| Vendor name close (similarity ≥ 0.8) | 38.7% | 38.7% (unchanged) |
+
+All 626 receipts: OCR'd with 0 failures in 643 s (about 1.0 s per receipt); after the change,
+57.0% totals and 78.2% dates correct across all 626. Full report: [docs/sroie_evaluation.md](docs/sroie_evaluation.md).
+The dataset is downloaded into `data/external/` and is not committed.
+
+## Results on the synthetic sample receipts
+
+All numbers below were measured by the code in this repo on the fake sample data.
 
 | Metric | Result | How it was measured |
 |---|---|---|
-| Images processed | 50 → 49 receipts, 0 failures | `run_pipeline --sample` |
+| Images processed | 51 → 50 receipts, 0 failures | `run_pipeline --sample` |
 | Duplicates caught | 2 of 2 planted: 1 exact file (hash, at ingestion), 1 re-photographed receipt (quality check) | pipeline + `dq.check_result` |
-| OCR (Tesseract): vendor / date / receipt no. / total | 100% / 100% / 100% / 96.0% | `src/evaluate_ocr.py` |
-| OCR (Tesseract): line items fully correct | 69.2% (quantity 78.8%, unit price 90.4%, line total 90.0% of matched lines) | `src/evaluate_ocr.py` |
-| OCR (Tesseract): average time | 527 ms per receipt | `src/evaluate_ocr.py` |
-| OCR (Gemini) | not measured yet (needs an API key) | `evaluate_ocr --method gemini` |
-| Data-quality failures right after OCR (49 receipts) | required fields 40, lines ≠ subtotal 20, total ≠ subtotal + tax 6, duplicate 1, invalid date 0, negative 0 → 41 sent to review | `src/quality.py` |
-| Review (demo reviewer on sample data) | 112 field corrections logged; 44 approved, 1 rejected, 4 left for a human | `scripts/demo_review_samples.py` |
+| Optional country check (`ALLOWED_COUNTRY=CA`) | 1 of 1 planted Australian receipt rejected automatically; 0 of 49 Canadian receipts wrongly flagged | `src/country.py` + `src/quality.py` |
+| OCR (Tesseract): vendor / date / receipt no. / total | 100% / 98.0% / 100% / 96.1% (the date miss is the Australian day-first date) | `src/evaluate_ocr.py` |
+| OCR (Tesseract): line items | 98.5% found, 73.0% fully correct (quantity 84.2%, unit price 88.8%, line total 89.2% of matched lines) | `src/evaluate_ocr.py` |
+| OCR (Tesseract): average time | 540 ms per receipt | `src/evaluate_ocr.py` |
+| OCR (Gemini) | not measured yet | `evaluate_ocr --method gemini` |
+| Data-quality failures right after OCR (50 receipts) | required fields 39, lines ≠ subtotal 21, total ≠ subtotal + tax 7, duplicate 1, invalid date 1, not Canadian 1, negative 0 → 42 sent to review, 1 rejected automatically, 7 pending | `src/quality.py` (fresh run in the test database) |
+| Review (demo reviewer on sample data) | 114 field corrections logged; 44 approved, 1 rejected (duplicate), 4 left for a human | `scripts/demo_review_samples.py` |
 | Items tracked | 24 standard items, 0 unmapped descriptions | `mart.dim_item` |
 | Price alerts | 1 (the planted +14.8% chicken breast increase) | `mart.v_price_alerts` |
 | Suppliers compared | 5 items across 4 suppliers | `mart.v_supplier_savings` |
 | Estimated monthly savings | $57.33 (**estimate**: ignores delivery fees, minimums, quality, availability) | `mart.v_supplier_savings` |
-| Chatbot accuracy | not measured yet (needs an API key); safety: 21 of 21 unsafe test queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
-| Automated tests | 357 passing | `python -m pytest` |
+| Chatbot accuracy (Gemini text-to-SQL) | **22 of 25** questions answered correctly (88%); 2 wrong, 1 not answered because every Gemini model was busy at that moment | `python -m src.chatbot --evaluate` |
+| Chatbot safety | 5 unsafe requests: Gemini wrote harmful SQL for 3 (DELETE, DROP, CREATE TABLE), all 3 blocked; the other 2 came back as harmless read-only queries; 0 data changed or exposed. Unit tests: 21 of 21 attack queries blocked | `src/chatbot.py`, `tests/test_chatbot.py` |
+| Chatbot response time | 1.0–2.1 s per question (3 questions timed) | `chatbot.ask` |
+| Automated tests | 392 passing | `python -m pytest` |
 
 Full OCR report: [docs/ocr_evaluation.md](docs/ocr_evaluation.md).
 

@@ -1,0 +1,73 @@
+{
+  "results": [
+    {
+      "split": "all",
+      "receipts": 626,
+      "not_ocred": 0,
+      "total_correct_pct": 57.0,
+      "date_correct_pct": 78.2,
+      "dates_labelled": 615,
+      "vendor_exact_pct": 18.2,
+      "vendor_close_pct": 33.5,
+      "total_found_pct": 82.4,
+      "date_found_pct": 85.6,
+      "avg_ocr_ms": 1024
+    },
+    {
+      "split": "dev",
+      "receipts": 300,
+      "not_ocred": 0,
+      "total_correct_pct": 53.0,
+      "date_correct_pct": 79.5,
+      "dates_labelled": 292,
+      "vendor_exact_pct": 19.7,
+      "vendor_close_pct": 28.0,
+      "total_found_pct": 76.7,
+      "date_found_pct": 85.3,
+      "avg_ocr_ms": 918
+    },
+    {
+      "split": "test",
+      "receipts": 326,
+      "not_ocred": 0,
+      "total_correct_pct": 60.7,
+      "date_correct_pct": 77.1,
+      "dates_labelled": 323,
+      "vendor_exact_pct": 16.9,
+      "vendor_close_pct": 38.7,
+      "total_found_pct": 87.7,
+      "date_found_pct": 85.9,
+      "avg_ocr_ms": 1121
+    }
+  ],
+  "test_history": [
+    {
+      "label": "Baseline (parser built for our own receipts)",
+      "split": "test",
+      "receipts": 326,
+      "not_ocred": 0,
+      "total_correct_pct": 20.9,
+      "date_correct_pct": 1.9,
+      "dates_labelled": 323,
+      "vendor_exact_pct": 16.9,
+      "vendor_close_pct": 38.7,
+      "total_found_pct": 22.4,
+      "date_found_pct": 1.8,
+      "avg_ocr_ms": 1121
+    },
+    {
+      "label": "Improved total/date rules (built on dev only)",
+      "split": "test",
+      "receipts": 326,
+      "not_ocred": 0,
+      "total_correct_pct": 60.7,
+      "date_correct_pct": 77.1,
+      "dates_labelled": 323,
+      "vendor_exact_pct": 16.9,
+      "vendor_close_pct": 38.7,
+      "total_found_pct": 87.7,
+      "date_found_pct": 85.9,
+      "avg_ocr_ms": 1121
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 """Generate fake supplier receipts (images + ground-truth JSON).
 
 All vendors, addresses and numbers are made up. These receipts are the
-public demo data and the labelled data for OCR evaluation.
+public demo data and the labelled data for OCR evaluation. The 4 regular
+vendors are (fake) Ontario suppliers: Canadian postal codes, GST/HST numbers,
+13% HST on supplies, no HST on basic groceries.
 
 Output in data/sample/:
     receipt_001.png   the receipt image (some are .jpg)
@@ -12,6 +14,7 @@ Deliberate problems (recorded in "deliberate_errors" in the JSON):
     lines_dont_match_subtotal printed SUBTOTAL is not the sum of the lines
     duplicate_receipt         same receipt photographed again (different image)
     duplicate_file            byte-for-byte copy of another image file
+    not_canadian              from a made-up Australian supplier (ABN, NSW 2000, GST)
 
 Usage:
     python scripts/make_sample_receipts.py
@@ -32,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import config  # noqa: E402
 
 SEED = 42
-UNIQUE_RECEIPTS = 48          # plus 2 duplicates = 50 files
+UNIQUE_RECEIPTS = 48          # + 1 Australian receipt + 2 duplicates = 51 files
 START_DATE = date(2026, 6, 1)
 END_DATE = date(2026, 11, 10)
 CENT = Decimal("0.01")
@@ -44,8 +47,9 @@ CENT = Decimal("0.01")
 VENDORS = [
     {
         "name": "Harbor Fresh Foods",
-        "address": "1200 Dockside Ave, Riverton",
-        "phone": "(555) 201-4410",
+        "address": "1200 Dockside Ave, Mississauga ON L5B 2C9",
+        "phone": "(905) 555-4410",
+        "business_number": "812345671 RT0001",
         "date_format": "%m/%d/%Y",          # 06/14/2026
         "number_format": "HF-{n:05d}",
         "number_start": 10200,
@@ -64,8 +68,9 @@ VENDORS = [
     },
     {
         "name": "Golden Valley Produce",
-        "address": "88 Orchard Rd, Fairfield",
-        "phone": "(555) 377-9021",
+        "address": "88 Orchard Rd, Brampton ON L6T 4K2",
+        "phone": "(905) 555-9021",
+        "business_number": "823456782 RT0001",
         "date_format": "%Y-%m-%d",          # 2026-06-14
         "number_format": "GVP{n:06d}",
         "number_start": 500100,
@@ -83,8 +88,9 @@ VENDORS = [
     },
     {
         "name": "Sunrise Meat Co.",
-        "address": "4 Packer St, Millbrook",
-        "phone": "(555) 640-1187",
+        "address": "4 Packer St, Etobicoke ON M9W 5L1",
+        "phone": "(416) 555-1187",
+        "business_number": "834567893 RT0001",
         "date_format": "%b %d, %Y",         # Jun 14, 2026
         "number_format": "SMC-{n:04d}",
         "number_start": 3100,
@@ -100,12 +106,13 @@ VENDORS = [
     },
     {
         "name": "Metro Restaurant Supply",
-        "address": "350 Commerce Blvd, Riverton",
-        "phone": "(555) 918-3300",
+        "address": "350 Commerce Blvd, Mississauga ON L4W 1N7",
+        "phone": "(905) 555-3300",
+        "business_number": "845678904 RT0001",
         "date_format": "%m/%d/%y",          # 06/14/26
         "number_format": "MRS{n:06d}",
         "number_start": 702300,
-        "tax_rate": Decimal("0.0825"),      # supplies are taxed
+        "tax_rate": Decimal("0.13"),        # supplies: 13% HST (Ontario)
         "items": [
             ("GLOVES NITRILE L 100CT", "BX", "9.80"),
             ("FOIL ROLL 18IN", "EA", "24.60"),
@@ -117,6 +124,26 @@ VENDORS = [
         ],
     },
 ]
+
+# A made-up AUSTRALIAN supplier, used for one receipt only. The country check
+# must reject it automatically (we only accept Canadian receipts).
+FOREIGN_VENDOR = {
+    "name": "Southern Cross Wholesale",
+    "address": "45 Harbour St, Sydney NSW 2000",
+    "phone": "(02) 9555 0199",
+    "business_line": "ABN 51 824 753 556",
+    "tax_label": "GST",
+    "country": "AU",
+    "date_format": "%d/%m/%Y",          # 14/06/2026 (day first)
+    "number_format": "SCW-{n:05d}",
+    "number_start": 40100,
+    "tax_rate": Decimal("0.10"),        # Australian GST
+    "items": [
+        ("CHKN BRST 10LB", "CS", "36.40"),
+        ("RICE JASMINE 25LB", "BAG", "31.90"),
+        ("NAPKINS 6000CT", "CS", "35.00"),
+    ],
+}
 
 # One item gets a deliberate price jump (> 10%) from September on,
 # so the price-alert feature (M6.2) has something to find.
@@ -199,6 +226,25 @@ def build_receipts(rng):
     return receipts
 
 
+def build_foreign_receipt(rng):
+    """One receipt from the made-up Australian supplier."""
+    vendor = FOREIGN_VENDOR
+    day = date(2026, 8, 20)
+    lines = make_lines(vendor, day, rng)
+    subtotal = sum((line["line_total"] for line in lines), Decimal("0"))
+    tax = money(subtotal * vendor["tax_rate"])
+    return {
+        "vendor": vendor,
+        "date": day,
+        "receipt_number": vendor["number_format"].format(n=vendor["number_start"]),
+        "lines": lines,
+        "subtotal": subtotal,
+        "tax": tax,
+        "total": subtotal + tax,
+        "deliberate_errors": ["not_canadian"],
+    }
+
+
 def add_deliberate_errors(receipts):
     """Break a few receipts on purpose. Indexes are fixed so results are repeatable."""
     # 1-3: printed total is wrong (typo on the receipt)
@@ -248,6 +294,8 @@ def receipt_text_lines(receipt):
         vendor["name"].upper().center(width),
         vendor["address"].center(width),
         ("Tel " + vendor["phone"]).center(width),
+        # Canadian suppliers print their GST/HST number; the Australian one its ABN
+        vendor.get("business_line", f"GST/HST #: {vendor.get('business_number', '')}"),
         "",
         f"INVOICE #: {receipt['receipt_number']}",
         f"DATE: {receipt['date'].strftime(vendor['date_format'])}",
@@ -266,7 +314,7 @@ def receipt_text_lines(receipt):
     rows += [
         "-" * width,
         f"{'SUBTOTAL':<36}{receipt['subtotal']:>14}",
-        f"{'TAX':<36}{receipt['tax']:>14}",
+        f"{vendor.get('tax_label', 'HST'):<36}{receipt['tax']:>14}",
         f"{'TOTAL':<36}{receipt['total']:>14}",
         "",
         "THANK YOU FOR YOUR BUSINESS".center(width),
@@ -313,6 +361,7 @@ def to_json(receipt, file_name):
     return {
         "file": file_name,
         "vendor": receipt["vendor"]["name"],
+        "country": receipt["vendor"].get("country", "CA"),
         "date": receipt["date"].isoformat(),
         "receipt_number": receipt["receipt_number"],
         "lines": [
@@ -360,6 +409,11 @@ def generate(out_dir=config.SAMPLE_DIR, seed=SEED):
         ext = "png" if number % 3 == 0 else "jpg"   # mix of formats
         image = draw_receipt(receipt, rng)
         save(image, to_json(receipt, ""), out_dir, f"receipt_{number:03d}", ext)
+
+    # One receipt from the Australian supplier (must be rejected by the country check)
+    number += 1
+    foreign = build_foreign_receipt(rng)
+    save(draw_receipt(foreign, rng), to_json(foreign, ""), out_dir, f"receipt_{number:03d}", "jpg")
 
     # Duplicate 1: the same paper receipt photographed again (new image, new hash)
     original = receipts[10]

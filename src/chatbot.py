@@ -99,16 +99,10 @@ Answer the question in one short plain-English sentence using only this result."
 
 def _call_gemini_text(prompt):
     """The only function that talks to the Gemini API here. Tests replace it."""
-    from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
-    response = client.models.generate_content(
-        model=config.GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(temperature=0),
-    )
-    return response.text
+    from src import gemini_client
+    return gemini_client.generate(prompt, types.GenerateContentConfig(temperature=0))
 
 
 def extract_sql(text):
@@ -202,11 +196,16 @@ def answer_in_words(question, result):
     return _call_gemini_text(ANSWER_PROMPT.format(question=question, table=table)).strip()
 
 
-def ask(question, app_conn):
+def ask(question, app_conn, sql_generator=None):
     """Answer one question. Returns a dict for the page:
-    {"sql", "result" (DataFrame or None), "blocked" (reason or None), "error", "answer"}"""
+    {"sql", "result" (DataFrame or None), "blocked" (reason or None), "error", "answer"}
+
+    sql_generator: optional replacement for generate_sql (the page passes a
+    cached version, so asking the same question again is instant).
+    """
+    sql_generator = sql_generator or generate_sql
     output = {"sql": None, "result": None, "blocked": None, "error": None, "answer": None}
-    output["sql"] = generate_sql(question, schema_description(app_conn))
+    output["sql"] = sql_generator(question, schema_description(app_conn))
     try:
         safe_sql = validate_sql(output["sql"])
     except BlockedQuery as reason:

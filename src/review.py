@@ -72,6 +72,7 @@ PROBLEM_TITLES = {
     "lines_match_subtotal": "The items don't add up to the subtotal",
     "total_is_subtotal_plus_tax": "Subtotal + tax doesn't match the total",
     "not_duplicate": "This receipt may already be saved",
+    "from_allowed_country": "Can't confirm this receipt is from Canada",
 }
 
 # Technical words in check details -> everyday words

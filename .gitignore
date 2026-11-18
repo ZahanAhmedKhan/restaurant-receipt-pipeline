@@ -19,6 +19,8 @@ data/raw/*
 data/failed/*
 !data/failed/.gitkeep
 data/private/
+# Public datasets downloaded for evaluation (not ours to republish)
+data/external/
 
 # Outputs
 exports/

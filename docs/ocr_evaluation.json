@@ -1,26 +1,26 @@
 {
   "tesseract": {
     "method": "tesseract",
-    "run_date": "2026-11-16",
-    "receipts": 50,
+    "run_date": "2026-11-17",
+    "receipts": 51,
     "errors": 0,
     "header_accuracy_pct": {
       "vendor": 100.0,
-      "date": 100.0,
+      "date": 98.0,
       "receipt_number": 100.0,
-      "total": 96.0
+      "total": 96.1
     },
     "lines": {
-      "true_lines": 260,
-      "extracted_lines": 260,
-      "matched_pct": 100.0,
-      "fully_correct_pct": 69.2,
+      "true_lines": 263,
+      "extracted_lines": 259,
+      "matched_pct": 98.5,
+      "fully_correct_pct": 73.0,
       "field_accuracy_pct": {
-        "quantity": 78.8,
-        "unit_price": 90.4,
-        "line_total": 90.0
+        "quantity": 84.2,
+        "unit_price": 88.8,
+        "line_total": 89.2
       }
     },
-    "avg_duration_ms": 527
+    "avg_duration_ms": 540
   }
 }

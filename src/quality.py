@@ -2,6 +2,8 @@
 
 Every check returns (passed, details). Results go to dq.check_result.
 Any failure -> review_status 'needs_review'; all pass -> 'pending' (waits for approval).
+A receipt that is clearly from another country (see src/country.py) is set to
+'rejected' automatically, with the reason logged in clean.correction.
 Approved or rejected receipts keep their status. Data is never deleted.
 
 Run checks on every open receipt:
@@ -12,6 +14,7 @@ import logging
 from datetime import date
 from decimal import Decimal
 
+from src import config, country
 from src.db import get_connection
 
 logger = logging.getLogger(__name__)
@@ -130,6 +133,40 @@ def check_not_duplicate(conn, receipt):
     return True, None
 
 
+def receipt_text(conn, receipt_id):
+    """All the text read from the receipt (OCR text, or Gemini's JSON as text)."""
+    row = conn.execute(
+        """
+        SELECT o.raw_text, o.raw_json::text
+        FROM clean.receipt r JOIN raw.ocr_run o ON o.ocr_run_id = r.ocr_run_id
+        WHERE r.receipt_id = %s
+        """,
+        (receipt_id,),
+    ).fetchone()
+    if row is None:
+        return ""
+    return row[0] or row[1] or ""
+
+
+def check_country(text, allowed=None):
+    """Is this receipt from the allowed country (ALLOWED_COUNTRY in .env, default CA)?
+
+    Returns (passed, details, foreign) where foreign is True when the receipt
+    clearly comes from another country (it is then rejected automatically).
+    """
+    allowed = allowed or config.ALLOWED_COUNTRY
+    detected, signs = country.detect_country(text)
+    if detected == allowed:
+        return True, None, False
+    if detected is not None:
+        name = country.COUNTRY_NAMES.get(detected, detected)
+        return False, f"looks {name}: {country.describe(signs)}", True
+    if signs:
+        return False, f"mixed country signs: {country.describe(signs)}", False
+    allowed_name = country.COUNTRY_NAMES.get(allowed, allowed)
+    return False, f"no {allowed_name} address, postal code or tax number found", False
+
+
 # ---------------------------------------------------------------------------
 # Database
 # ---------------------------------------------------------------------------
@@ -169,6 +206,12 @@ def run_checks(conn, receipt_id):
         results[name] = check(receipt, lines)
     results["not_duplicate"] = check_not_duplicate(conn, receipt)
 
+    # Country check (switched off when ALLOWED_COUNTRY is empty)
+    foreign = False
+    if config.ALLOWED_COUNTRY:
+        passed, details, foreign = check_country(receipt_text(conn, receipt_id))
+        results["from_allowed_country"] = (passed, details)
+
     all_passed = all(passed for passed, _ in results.values())
 
     with conn.transaction():
@@ -182,7 +225,18 @@ def run_checks(conn, receipt_id):
             )
         # Only open receipts change status; approved/rejected stay as they are
         if receipt["review_status"] in OPEN_STATUSES:
-            new_status = "pending" if all_passed else "needs_review"
+            if foreign:
+                # Clearly from another country: reject automatically. The receipt
+                # is kept (status 'rejected') and the reason is logged.
+                new_status = "rejected"
+                conn.execute(
+                    "INSERT INTO clean.correction (receipt_id, field_name, old_value, new_value) "
+                    "VALUES (%s, 'review_status', %s, %s)",
+                    (receipt_id, receipt["review_status"],
+                     "rejected (automatic: " + results["from_allowed_country"][1] + ")"),
+                )
+            else:
+                new_status = "pending" if all_passed else "needs_review"
             conn.execute(
                 "UPDATE clean.receipt SET review_status = %s, updated_at = now() "
                 "WHERE receipt_id = %s",

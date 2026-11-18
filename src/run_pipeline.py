@@ -172,6 +172,14 @@ def process_single_image(conn, data, original_name, source, raw_dir=None):
     checks = quality.run_checks(conn, receipt_id)
     result["receipt_id"] = receipt_id
     result["needs_review"] = not all(passed for passed, _ in checks.values())
+
+    # Clearly from another country: the checks rejected it automatically
+    status = conn.execute("SELECT review_status FROM clean.receipt WHERE receipt_id = %s",
+                          (receipt_id,)).fetchone()[0]
+    if status == "rejected":
+        result["status"] = "wrong_country"
+        result["reason"] = checks["from_allowed_country"][1]
+        result["needs_review"] = False
     return result
 
 

@@ -21,8 +21,8 @@ def lines_sum(data):
     return sum(Decimal(line["line_total"]) for line in data["lines"])
 
 
-def test_sample_folder_has_50_receipts():
-    assert len(SAMPLE_JSON) == 50
+def test_sample_folder_has_51_receipts():
+    assert len(SAMPLE_JSON) == 51
 
 
 @pytest.mark.parametrize("path", SAMPLE_JSON, ids=lambda p: p.stem)
@@ -68,6 +68,7 @@ def test_expected_number_of_deliberate_errors():
     assert all_errors.count("lines_dont_match_subtotal") == 1
     assert all_errors.count("duplicate_receipt") == 1
     assert all_errors.count("duplicate_file") == 1
+    assert all_errors.count("not_canadian") == 1
 
 
 def test_duplicate_file_has_same_hash_as_original():
@@ -83,6 +84,6 @@ def test_duplicate_file_has_same_hash_as_original():
 def test_generator_is_repeatable(tmp_path):
     """Running the generator again gives identical ground truth."""
     count = generate(out_dir=tmp_path)
-    assert count == 50
+    assert count == 51
     for path in SAMPLE_JSON:
         assert load(tmp_path / path.name) == load(path)

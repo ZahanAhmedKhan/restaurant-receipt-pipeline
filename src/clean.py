@@ -13,20 +13,43 @@ from decimal import Decimal, InvalidOperation
 
 import pandas as pd
 
+from src import config
 from src.db import get_connection
 from src.parse import parse_receipt_text
 
 logger = logging.getLogger(__name__)
 
-# Date formats our suppliers print, tried in this order
-DATE_FORMATS = [
+# Date formats tried in order. "06/07/2026" is ambiguous (June 7 or July 6),
+# so DATE_ORDER in .env says which comes first: MDY (default) or DMY.
+DATE_FORMATS_MONTH_FIRST = [
     "%m/%d/%Y",    # 06/14/2026
     "%Y-%m-%d",    # 2026-06-14
     "%b %d, %Y",   # Jun 14, 2026
     "%b %d %Y",    # Jun 14 2026 (OCR dropped the comma)
     "%m/%d/%y",    # 06/14/26
     "%d-%b-%Y",    # 14-Jun-2026
+    "%Y/%m/%d",    # 2026/06/14
+    "%m-%d-%Y",    # 06-14-2026
+    "%m-%d-%y",    # 06-14-26
+    "%d %b %Y",    # 14 Jun 2026
+    "%B %d, %Y",   # June 14, 2026
 ]
+DATE_FORMATS_DAY_FIRST = [
+    "%d/%m/%Y",    # 14/06/2026
+    "%Y-%m-%d",    # 2026-06-14
+    "%d/%m/%y",    # 14/06/26
+    "%d-%m-%Y",    # 14-06-2026
+    "%d-%m-%y",    # 14-06-26
+    "%d.%m.%Y",    # 14.06.2026
+    "%d %b %Y",    # 14 Jun 2026
+    "%d-%b-%Y",    # 14-Jun-2026
+    "%b %d, %Y",   # Jun 14, 2026
+    "%Y/%m/%d",    # 2026/06/14
+    "%d.%m.%y",    # 14.06.26
+    "%d %b %y",    # 14 Jun 26
+    "%d %B %Y",    # 14 June 2026
+]
+DATE_FORMATS = DATE_FORMATS_MONTH_FIRST     # kept for older code that reads it
 
 # How similar an OCR'd vendor name must be to a known one (0..1) to map it
 VENDOR_MATCH_CUTOFF = 0.85
@@ -50,7 +73,11 @@ def clean_date(value):
     text = clean_text(value)
     if text is None:
         return None
-    for fmt in DATE_FORMATS:
+    if config.DATE_ORDER == "DMY":
+        formats = DATE_FORMATS_DAY_FIRST
+    else:
+        formats = DATE_FORMATS_MONTH_FIRST
+    for fmt in formats:
         try:
             # strptime is case-insensitive for month names (JUL == Jul)
             return datetime.strptime(text, fmt).date()

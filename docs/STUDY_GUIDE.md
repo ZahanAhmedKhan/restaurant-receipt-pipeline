@@ -59,7 +59,7 @@ opens the dining room, and only to look.
 
 ## 2. Fake data with ground truth
 
-**What it does.** Draws 50 realistic receipt images from 4 made-up vendors and saves, for each,
+**What it does.** Draws 51 realistic receipt images (4 made-up Ontario vendors + 1 Australian one) and saves, for each,
 a JSON file with the correct values. Some receipts are broken on purpose.
 
 **Files.** `scripts/make_sample_receipts.py`, `data/sample/`, `tests/test_sample_receipts.py`.
@@ -384,7 +384,7 @@ honest number beats an impressive one.
 
 ## 14. Measuring OCR (and comparing with Gemini)
 
-**What it does.** Runs the same extraction code as the pipeline on all 50 sample images and scores
+**What it does.** Runs the same extraction code as the pipeline on all 51 sample images and scores
 it against the ground truth: header fields, line items (matched by description similarity), timing.
 
 **Files.** `src/evaluate_ocr.py`, `docs/ocr_evaluation.md`, `docs/ocr_evaluation.json`, `tests/test_evaluate_ocr.py`.

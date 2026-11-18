@@ -1,43 +1,36 @@
 {
-  "file": "receipt_049.png",
-  "vendor": "Golden Valley Produce",
-  "date": "2026-07-10",
-  "receipt_number": "GVP500328",
+  "file": "receipt_049.jpg",
+  "vendor": "Southern Cross Wholesale",
+  "country": "AU",
+  "date": "2026-08-20",
+  "receipt_number": "SCW-40100",
   "lines": [
     {
-      "description": "TOMATOES ROMA 25 LB",
-      "quantity": "5",
-      "unit": "CS",
-      "unit_price": "31.39",
-      "line_total": "156.95"
-    },
-    {
-      "description": "POTATO RUSSET 50LB",
-      "quantity": "4",
-      "unit": "BAG",
-      "unit_price": "26.56",
-      "line_total": "106.24"
-    },
-    {
-      "description": "GARLIC PEELED 5LB",
-      "quantity": "4",
-      "unit": "BAG",
-      "unit_price": "16.69",
-      "line_total": "66.76"
-    },
-    {
-      "description": "LETTUCE ROMAINE 24CT",
+      "description": "NAPKINS 6000CT",
       "quantity": "1",
       "unit": "CS",
-      "unit_price": "34.06",
-      "line_total": "34.06"
+      "unit_price": "35.58",
+      "line_total": "35.58"
+    },
+    {
+      "description": "RICE JASMINE 25LB",
+      "quantity": "5",
+      "unit": "BAG",
+      "unit_price": "31.85",
+      "line_total": "159.25"
+    },
+    {
+      "description": "CHKN BRST 10LB",
+      "quantity": "1",
+      "unit": "CS",
+      "unit_price": "36.52",
+      "line_total": "36.52"
     }
   ],
-  "subtotal": "364.01",
-  "tax": "0.00",
-  "total": "364.01",
+  "subtotal": "231.35",
+  "tax": "23.14",
+  "total": "254.49",
   "deliberate_errors": [
-    "duplicate_receipt"
-  ],
-  "duplicate_of": "receipt_011"
+    "not_canadian"
+  ]
 }

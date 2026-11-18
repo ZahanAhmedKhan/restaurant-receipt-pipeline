@@ -96,8 +96,8 @@ def _count(conn, table):
 
 
 def test_pipeline_loads_receipts_and_rerun_creates_no_duplicates(db_conn, tmp_path):
-    # receipt_050 is a byte-for-byte copy of receipt_007
-    inbox = _sample_inbox(tmp_path, ["receipt_003.png", "receipt_007.jpg", "receipt_050.jpg"])
+    # receipt_051 is a byte-for-byte copy of receipt_007
+    inbox = _sample_inbox(tmp_path, ["receipt_003.png", "receipt_007.jpg", "receipt_051.jpg"])
     dirs = dict(inbox_dir=inbox, raw_dir=tmp_path / "raw", failed_dir=tmp_path / "failed")
 
     first = run_pipeline.run(conn=db_conn, **dirs)

@@ -1,6 +1,7 @@
 {
   "file": "receipt_037.jpg",
   "vendor": "Metro Restaurant Supply",
+  "country": "CA",
   "date": "2026-10-03",
   "receipt_number": "MRS702548",
   "lines": [
@@ -34,7 +35,7 @@
     }
   ],
   "subtotal": "480.44",
-  "tax": "39.64",
-  "total": "520.08",
+  "tax": "62.46",
+  "total": "542.90",
   "deliberate_errors": []
 }

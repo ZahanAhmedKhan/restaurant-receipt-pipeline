@@ -101,7 +101,9 @@ erDiagram
 
 **dq.check_result**: `check_id`, `receipt_id`, `check_name`, `passed`, `details`, `checked_at`;
 UNIQUE (`receipt_id`, `check_name`). Checks: `required_fields`, `valid_date`,
-`no_negative_values`, `lines_match_subtotal`, `total_is_subtotal_plus_tax`, `not_duplicate`.
+`no_negative_values`, `lines_match_subtotal`, `total_is_subtotal_plus_tax`, `not_duplicate`,
+`from_allowed_country` (Canada only by default; a receipt clearly from another country is set to
+`rejected` automatically and the reason is logged in `clean.correction`).
 
 ## mart: star schema (approved receipts only)
 

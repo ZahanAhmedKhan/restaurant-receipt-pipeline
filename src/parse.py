@@ -17,6 +17,7 @@ to Decimal. Anything we can't read confidently becomes None. We never guess.
 """
 
 import re
+from decimal import Decimal
 
 # Units our suppliers print. Matched case-insensitively ("cs" == "CS").
 KNOWN_UNITS = {"CS", "BAG", "JUG", "EA", "LB", "BX", "KG", "DZ", "GAL", "CT", "PK"}
@@ -31,16 +32,20 @@ QUANTITY_PATTERN = re.compile(r"^\d{1,5}(\.\d{1,3})?$")
 
 # Header lines. ^ and $ with re.MULTILINE match at the start/end of each line.
 RECEIPT_NUMBER_PATTERN = re.compile(r"^\s*(?:INVOICE|RECEIPT)\s*(?:#|NO\.?)?\s*[:;]?\s*(\S+)", re.I | re.M)
-DATE_PATTERN = re.compile(r"^\s*DATE\s*[:;]?\s*(.+?)\s*$", re.I | re.M)
 SUBTOTAL_PATTERN = re.compile(r"^\s*SUB\s*-?\s*TOTAL\s*[:;]?\s*(\S+)\s*$", re.I | re.M)
-TAX_PATTERN = re.compile(r"^\s*TAX\s*[:;]?\s*(\S+)\s*$", re.I | re.M)
-TOTAL_PATTERN = re.compile(r"^\s*TOTAL\s*[:;]?\s*(\S+)\s*$", re.I | re.M)
+# Tax lines: TAX, or Canadian labels HST, GST/HST, GST, PST, QST (TPS/TVQ in French).
+# The amount is the last token on the line ("HST 13% 50.50" -> 50.50).
+TAX_LINE_PATTERN = re.compile(
+    r"^\s*(?:SALES\s+)?(?:TAX|GST\s*/\s*HST|HST|GST|PST|QST|TPS|TVQ)\b.*?(\S+)\s*$", re.I | re.M)
+# Lines that only show a tax REGISTRATION number, not an amount
+TAX_NUMBER_LINE = re.compile(r"#|\bREG\b|\bNO\.|\d{9}\s?RT", re.I)
 
 # The column header line that starts the item list
 ITEMS_HEADER_PATTERN = re.compile(r"^\s*QTY\b.*DESCRIPTION", re.I)
 # The item list ends at the first SUBTOTAL / TAX / TOTAL line,
 # even if OCR garbled the number after it
-ITEMS_END_PATTERN = re.compile(r"^\s*(?:SUB\s*-?\s*TOTAL|TAX|TOTAL)\b", re.I)
+ITEMS_END_PATTERN = re.compile(
+    r"^\s*(?:SUB\s*-?\s*TOTAL|TAX|TOTAL|GST|HST|PST|QST|TPS|TVQ)\b", re.I)
 # Lines made only of dashes, equals signs or underscores
 SEPARATOR_PATTERN = re.compile(r"^[\s\-=_~.]+$")
 
@@ -91,6 +96,96 @@ def first_match(pattern, text):
 # ---------------------------------------------------------------------------
 # Header fields
 # ---------------------------------------------------------------------------
+def parse_tax(text):
+    """Add up every tax line (e.g. GST 5.00 + PST 7.00 = 12.00).
+
+    Returns None if there is no tax line, or if any tax amount can't be read
+    (a partial sum would be a guess).
+    """
+    amounts = []
+    for match in TAX_LINE_PATTERN.finditer(text):
+        line = match.group(0)
+        if TAX_NUMBER_LINE.search(line):
+            continue                       # 'GST/HST #: 123456789 RT0001' is not an amount
+        amount = parse_money(match.group(1))
+        if amount is None:
+            return None
+        amounts.append(Decimal(amount))
+    if not amounts:
+        return None
+    return str(sum(amounts))
+
+
+# --- Total -------------------------------------------------------------------
+# A line that can hold the final total
+TOTAL_WORDS = re.compile(r"TOTAL|AMOUNT\s+DUE|BALANCE\s+DUE|\bNETT?\b|GRAND", re.I)
+# Lines with the word TOTAL that are NOT the final total
+NOT_FINAL_TOTAL = re.compile(
+    r"SUB|QTY|QUANTITY|ITEMS?\b|SAVING|DISCOUNT|CHANGE|TENDER|\bCASH\b|EXCL|\bEX\)"
+    r"|TOTAL\s*(?:GST|TAX|SST|HST|VAT)\b|TOTALGST|SUMMARY|INCLUDED",
+    re.I,
+)
+# One amount on a line: 9.00, 1,234.56, 5,90 (decimal comma), 11. 80 (OCR space)
+AMOUNT_PATTERN = re.compile(r"(?<![\d.,])(\d{1,3}(?:,\d{3})+|\d+)\s?[.,]\s?(\d{2})(?!\d)")
+
+
+def amounts_on_line(line):
+    """All money amounts on a line, as clean strings ('1234.56')."""
+    # Fix OCR letter/digit mix-ups only in tokens that contain a digit
+    tokens = [fix_digits(t) if any(c.isdigit() for c in t) else t for t in line.split()]
+    amounts = []
+    for whole, cents in AMOUNT_PATTERN.findall(" ".join(tokens)):
+        amounts.append(f"{whole.replace(',', '')}.{cents}")
+    return amounts
+
+
+def parse_total(lines):
+    """The final total: the LAST total-type line that holds exactly one amount.
+
+    Receipts usually go subtotal -> tax -> total -> rounded total, so the last
+    total line is the amount actually paid. Sub-totals, item counts, tax lines
+    and two-amount summary rows are skipped.
+    """
+    total = None
+    for line in lines:
+        if not TOTAL_WORDS.search(line) or NOT_FINAL_TOTAL.search(line):
+            continue
+        amounts = amounts_on_line(line)
+        if len(amounts) == 1:
+            total = amounts[0]
+    return total
+
+
+# --- Date --------------------------------------------------------------------
+MONTHS = r"(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|SEPT|OCT|NOV|DEC)[A-Z]*\.?"
+DATE_TOKEN = re.compile(
+    r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b"                      # 2018/02/22, 2026-06-14
+    r"|\b\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}\b"                  # 25/12/2018, 23-01-2019, 5.3.18
+    rf"|\b\d{{1,2}}[ -]?{MONTHS}[ -]?\d{{2,4}}\b"            # 12 Mar 2018, 14-Jun-2026
+    rf"|\b{MONTHS}\s+\d{{1,2}},?\s+\d{{4}}\b",               # Jul 10, 2026
+    re.I,
+)
+# "DATE" and common OCR misreadings of it
+DATE_LABEL = re.compile(r"\b(?:DATE|DATED|DALE|DATA|FATE)\b", re.I)
+
+
+def parse_date(lines):
+    """The receipt date as printed (raw text; clean.py decides day/month order).
+
+    Prefer a date on a line labelled DATE; otherwise the first date anywhere.
+    """
+    first_found = None
+    for line in lines:
+        match = DATE_TOKEN.search(line)
+        if not match:
+            continue
+        if DATE_LABEL.search(line):
+            return match.group(0)
+        if first_found is None:
+            first_found = match.group(0)
+    return first_found
+
+
 def parse_vendor(lines):
     """The vendor name is the first non-empty line of the receipt."""
     for line in lines:
@@ -184,10 +279,10 @@ def parse_receipt_text(text):
 
     return {
         "vendor": parse_vendor(lines),
-        "date": first_match(DATE_PATTERN, text),
+        "date": parse_date(lines),
         "receipt_number": first_match(RECEIPT_NUMBER_PATTERN, text),
         "lines": items,
         "subtotal": parse_money(first_match(SUBTOTAL_PATTERN, text)),
-        "tax": parse_money(first_match(TAX_PATTERN, text)),
-        "total": parse_money(first_match(TOTAL_PATTERN, text)),
+        "tax": parse_tax(text),
+        "total": parse_total(lines),
     }

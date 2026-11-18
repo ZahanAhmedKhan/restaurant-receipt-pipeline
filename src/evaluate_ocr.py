@@ -233,7 +233,7 @@ def render_report(all_results):
     return "\n".join([
         "# OCR evaluation",
         "",
-        "Measured by `python -m src.evaluate_ocr` on the 50 synthetic sample receipts in `data/sample/`",
+        "Measured by `python -m src.evaluate_ocr` on the 51 synthetic sample receipts in `data/sample/`",
         "(fake vendors, ground truth in the matching JSON files). Numbers below are what the script measured.",
         "",
         header,

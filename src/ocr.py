@@ -121,20 +121,17 @@ def check_allowed_for_external_ai(path):
 def _call_gemini(image_bytes, mime_type):
     """The only function that talks to the Gemini API. Returns the JSON text.
     Tests replace this function, so they never call the real API."""
-    from google import genai               # imported here: only needed for Gemini
-    from google.genai import types
+    from google.genai import types          # imported here: only needed for Gemini
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
-    response = client.models.generate_content(
-        model=config.GEMINI_MODEL,
-        contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), GEMINI_PROMPT],
-        config=types.GenerateContentConfig(
+    from src import gemini_client
+    return gemini_client.generate(
+        [types.Part.from_bytes(data=image_bytes, mime_type=mime_type), GEMINI_PROMPT],
+        types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=GEMINI_SCHEMA,
             temperature=0,
         ),
     )
-    return response.text
 
 
 def _as_text(value):

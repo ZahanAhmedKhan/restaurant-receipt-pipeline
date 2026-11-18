@@ -102,6 +102,35 @@ def test_garbled_subtotal_still_ends_item_list():
     assert result["tax"] == "10.85"
 
 
+def test_canadian_tax_labels():
+    assert parse_receipt_text("SUBTOTAL 100.00\nHST 13.00\nTOTAL 113.00")["tax"] == "13.00"
+    assert parse_receipt_text("HST 13% 50.50\nTOTAL 438.96")["tax"] == "50.50"
+    assert parse_receipt_text("GST/HST 5.00\nTOTAL 105.00")["tax"] == "5.00"
+
+
+def test_several_tax_lines_are_added_up():
+    # British Columbia: GST + PST; Quebec: TPS + TVQ
+    assert parse_receipt_text("GST 5.00\nPST 7.00\nTOTAL 112.00")["tax"] == "12.00"
+    assert parse_receipt_text("TPS 2.30\nTVQ 4.59\nTOTAL 52.89")["tax"] == "6.89"
+
+
+def test_tax_registration_number_is_not_an_amount():
+    text = "GST/HST #: 812345671 RT0001\nINVOICE #: HF-1\nSUBTOTAL 10.00\nHST 0.00\nTOTAL 10.00"
+    assert parse_receipt_text(text)["tax"] == "0.00"
+
+
+def test_unreadable_tax_line_gives_none():
+    assert parse_receipt_text("GST 5.00\nPST 7.0O0\nTOTAL 112.00")["tax"] is None
+
+
+def test_hst_line_ends_item_list():
+    text = ("QTY DESCRIPTION UNIT PRICE AMOUNT\n"
+            "1 FOIL ROLL 18IN EA 24.60 24.60\n"
+            "HST 3.20\n"
+            "TOTAL 27.80\n")
+    assert len(parse_receipt_text(text)["lines"]) == 1
+
+
 def test_empty_text_gives_all_none():
     result = parse_receipt_text("")
     assert result == {"vendor": None, "date": None, "receipt_number": None, "lines": [],

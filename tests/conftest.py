@@ -34,6 +34,15 @@ def _connect_or_skip():
         pytest.skip(f"Test database not available: {type(error).__name__}")
 
 
+@pytest.fixture(autouse=True)
+def no_country_check_by_default(monkeypatch):
+    """Most tests build receipts by hand, without any receipt text, so the
+    country check would fail them. It is switched off here; the country tests
+    switch it on with monkeypatch.setattr(config, "ALLOWED_COUNTRY", "CA")."""
+    from src import config
+    monkeypatch.setattr(config, "ALLOWED_COUNTRY", "")
+
+
 @pytest.fixture(scope="session")
 def migrated_db():
     """Apply all migrations to the test database once per test run."""
